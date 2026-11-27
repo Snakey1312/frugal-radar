@@ -36,6 +36,7 @@
     ['salomon', 'Salomon'], ['jordan', 'Jordan'], ['converse', 'Converse'],
     ['vans', 'Vans'], ['fila', 'Fila'], ['hoka', 'Hoka'],
     ['skechers', 'Skechers'], ['timberland', 'Timberland'],
+    ['ugg', 'UGG'], ['north face', 'The North Face'],
   ];
 
   const MODELS = [
@@ -49,6 +50,8 @@
     [/gel\s*kayano\s*(\d+)?/, 'GEL-KAYANO', 'shoes'],
     [/ultra\s*boost/, 'Ultraboost', 'shoes'],
     [/samba(?:\s*og)?/, 'Samba OG', 'shoes'],
+    [/lowmel/, 'Lowmel', 'shoes'],
+    [/classic\s*(?:ultra)?\s*mini/, 'Classic Ultra Mini', 'shoes'],
     [/dunk\s*low/, 'Dunk Low', 'shoes'],
     [/yeezy\s*boost/, 'Yeezy Boost', 'shoes'],
     [/jordan\s*(\d+)/, 'Air Jordan', 'shoes'],
@@ -82,6 +85,10 @@
     green: ['green', 'verde', 'verzi'],
     yellow: ['yellow', 'galben', 'galbena', 'galbeni', 'galbene'],
     brown: ['brown', 'maro'],
+    camel: ['camel', 'tan', 'taupe'],
+    chestnut: ['chestnut', 'maroniu', 'maro deschis'],
+    khaki: ['khaki', 'kaki'],
+    mustard: ['mustard', 'mustard seed'],
     beige: ['beige', 'bej'],
     pink: ['pink', 'roz', 'rozaliu'],
     purple: ['purple', 'violet', 'mov'],
@@ -127,6 +134,51 @@
     return '';
   }
 
+  // Keep the word actually printed on screen ("camel"), not the internal group
+  // label ("brown"), so the generated search query stays faithful to the photo.
+  function detectColorTerm(text) {
+    for (const words of Object.values(COLOR_GROUPS)) {
+      for (const word of words) if (hasTerm(text, word)) return word;
+    }
+    return '';
+  }
+
+  function detectAudience(text) {
+    const t = normalize(text);
+    if (/(?:^|\s)(copii|copil|kids|child|baieti|fetite|fete)(?:$|\s)/.test(t)) return 'kids';
+    if (/(?:^|\s)(femei|dama|doamne|women|woman|ladies)(?:$|\s)/.test(t)) return 'women';
+    if (/(?:^|\s)(barbati|men)(?:$|\s)/.test(t)) return 'men';
+    return '';
+  }
+
+  // Retail screenshots usually expose a breadcrumb such as
+  // "Sneakers Copii > ... > UGG > UGG LOWMEL". The last segment carries the
+  // exact model even when no hardcoded MODELS pattern knows that model name.
+  function extractBreadcrumbModel(lines) {
+    const crumbWords = new Set([
+      'sneakers', 'pantofi', 'sport', 'stil', 'gheata', 'cizme', 'copii', 'copil',
+      'dama', 'femei', 'barbati', 'incaltaminte', 'produse', 'catalog',
+    ]);
+    for (let i = lines.length - 1; i >= 0; i -= 1) {
+      const raw = String(lines[i] || '');
+      if (!raw.includes('>')) continue;
+      const parts = raw.split('>').map((part) => normalize(part)).filter(Boolean);
+      if (parts.length < 2) continue;
+      const last = parts[parts.length - 1];
+      const parent = parts[parts.length - 2];
+      const brand = findBrand(last) || findBrand(parent);
+      const brandWords = new Set((brand ? normalize(brand) : '').split(' ').filter(Boolean));
+      const tokens = last.split(' ')
+        .filter((w) => w.length > 2 && !crumbWords.has(w) && !brandWords.has(w));
+      if (tokens.length === 0) continue;
+      const model = tokens.slice(-2)
+        .map((w) => w[0].toUpperCase() + w.slice(1))
+        .join(' ');
+      return { brand, model, category: 'shoes' };
+    }
+    return null;
+  }
+
   function findSize(text) {
     for (const re of [
       /(?:marimea|marime|size)\s*:?\s*(\d{2}(?:\.\d)?)/,
@@ -167,10 +219,16 @@
     const text = normalize(lines.join(' '));
     if (!text) return null;
 
-    const brand = findBrand(text);
-    const found = findModel(text);
+    const crumb = extractBreadcrumbModel(lines);
+    let brand = findBrand(text) || crumb?.brand || '';
+    let found = findModel(text);
+    if (crumb && (!found.model || crumb.model.length > found.model.length)) {
+      found = { model: crumb.model, category: crumb.category };
+    }
     const category = detectCategory(text, found.category);
     const color = detectColor(text);
+    const colorTerm = detectColorTerm(text);
+    const audience = detectAudience(text);
     const size = findSize(text);
     const capacity = findCapacity(text, category);
 
@@ -178,7 +236,7 @@
     if (!query) {
       const parts = [brand, found.model];
       if (!found.model && category === 'shoes') parts.push('sneakers');
-      parts.push(color, capacity);
+      parts.push(colorTerm || color, capacity);
       query = parts.filter(Boolean).join(' ');
     }
 
@@ -198,6 +256,8 @@
       brand,
       model: found.model,
       color,
+      colorTerm,
+      audience,
       confidence,
       ocrLines: lines.slice(0, 10),
     };

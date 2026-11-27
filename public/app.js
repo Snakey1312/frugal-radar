@@ -48,6 +48,8 @@
       sephoraGold: false,
     },
     currentPhotoObjectUrl: null,
+    currentOcrAudience: '',
+    ocrBaseQuery: '',
     activeStockCheckController: null,
   };
 
@@ -774,11 +776,21 @@
 
   // --- Search API ---
   async function runSearch(query, { forceRefresh = false, sourceOffer = null } = {}) {
-    state.lastQuery = query;
+    // A kids' product photo can be used to find the adult version (e.g. women's
+    // EU 38). When the shopper picks an adult size, silently target "dama".
+    let effectiveQuery = String(query || '').trim();
+    if (state.currentOcrAudience === 'kids' && effectiveQuery === state.ocrBaseQuery) {
+      const wantedSize = Number(sizeSelect.value);
+      if (wantedSize >= 35 && wantedSize <= 50
+        && !/\b(dama|femei|women)\b/i.test(effectiveQuery)) {
+        effectiveQuery = `${effectiveQuery} dama`;
+      }
+    }
+    state.lastQuery = effectiveQuery;
     state.lastSearchCategory = categorySelect.value;
     state.sourceOffer = sourceOffer;
 
-    announcer.textContent = `Caut ${query} pe magazinele românești...`;
+    announcer.textContent = `Caut ${effectiveQuery} pe magazinele românești...`;
     resultsSection.hidden = false;
     sourceComparisonBanner.hidden = true;
     winnerCard.replaceChildren();
@@ -800,7 +812,7 @@
         method: 'POST',
         headers,
         body: JSON.stringify({
-          query,
+          query: effectiveQuery,
           category: categorySelect.value,
           size: sizeSelect.value,
           forceRefresh,
@@ -1349,6 +1361,10 @@
     renderStoreHealthStrip(data.storeHealth);
   }
 
+  photoQueryInput.addEventListener('input', () => {
+    if (photoQueryInput.value !== state.ocrBaseQuery) state.currentOcrAudience = '';
+  });
+
   // --- Form 1: Name ---
   formName.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -1592,6 +1608,8 @@
       const result = apiKey
         ? await identifyWithServerProxy(file, apiKey)
         : await identifyWithBrowserOcr(file);
+      state.currentOcrAudience = result?.audience || '';
+      state.ocrBaseQuery = result?.query || '';
       if (result?.query) {
         photoQueryInput.value = result.query;
         const label = result.source === 'local_ocr' ? 'Identificat din imagine' : 'Identificat automat';

@@ -204,6 +204,26 @@ test('scoreCandidate keeps accessory queries distinct from the main device', () 
   }
 });
 
+test('UGG Lowmel camel query rejects other models, colors and kids listings', () => {
+  const query = 'UGG Lowmel camel dama';
+
+  const exact = scoreCandidate('UGG Lowmel Camel, pantofi sport dama', query, {
+    category: 'shoes', price: 625.5,
+  });
+  assert.equal(exact.rejected, false);
+  assert.equal(exact.variantBucket, 'exact_variant');
+
+  for (const wrong of [
+    'UGG Lowmel Negru, pantofi sport dama',
+    'UGG Classic Ultra Mini Camel, pantofi dama',
+    'UGG Lowmel Camel, pantofi sport copii',
+    'Nike Air Max Plus TN Camel, pantofi sport dama',
+  ]) {
+    const scored = scoreCandidate(wrong, query, { category: 'shoes', price: 599 });
+    assert.equal(scored.rejected, true, `should reject ${wrong}`);
+  }
+});
+
 test('Serper eMAG refill offers stay in the main list for accessory queries', () => {
   const query = 'rezerve philips oneblade pro 360';
 

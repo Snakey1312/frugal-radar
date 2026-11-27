@@ -11,7 +11,7 @@ npm start
 # http://localhost:3456
 ```
 
-Teste: `npm test` (36/36).
+Teste: `npm test` (39/39).
 
 ## Publicare gratuită pe Vercel
 
