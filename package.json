@@ -1,6 +1,6 @@
 {
   "name": "frugal-radar",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Comparator inteligent de preturi pe site-urile romanesti cu calcul transport, ramburs si verificare stoc marime.",
   "main": "server.js",
   "scripts": {
