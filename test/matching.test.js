@@ -204,6 +204,28 @@ test('scoreCandidate keeps accessory queries distinct from the main device', () 
   }
 });
 
+test('Serper eMAG refill offers stay in the main list for accessory queries', () => {
+  const query = 'rezerve philips oneblade pro 360';
+
+  const emagRefills = [
+    'Rezerva PHILIPS OneBlade 360, QP420/50, otel inoxidabil, umed si uscat, kit 2 lame, pentru orice model Philips OneBlade si OneBlade Pro',
+    'Rezerva Philips OneBlade 360 QP430/50, 3 lame, verde',
+    'Rezerve Philips OneBlade Pro 360 QP440/50 set 4 lame',
+  ];
+
+  for (const title of emagRefills) {
+    const scored = scoreCandidate(title, query, { category: 'pharmacy_beauty', price: 104.83 });
+    assert.equal(scored.rejected, false, `should keep eMAG refill ${title}`);
+    assert.equal(scored.variantBucket, 'exact_variant');
+  }
+
+  const device = scoreCandidate('Aparat de ras Philips OneBlade Pro 360 cu 2 capete', query, {
+    category: 'pharmacy_beauty',
+    price: 399.9,
+  });
+  assert.equal(device.rejected, true);
+});
+
 test('canonicalizeUrl, extractStoreProductKey, buildClusterKey, and distillQuery work accurately', () => {
   const canon = canonicalizeUrl('https://WWW.eMAG.ro/telefon-apple/pd/D123ABC/?utm_source=google&fbclid=xyz&variant=black&id=99#reviews');
   assert.equal(canon, 'https://emag.ro/telefon-apple/pd/D123ABC?id=99&variant=black');
