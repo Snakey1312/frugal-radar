@@ -1463,7 +1463,30 @@
     }
   }
 
+  // Vercel caps request bodies at 4.5 MB, so large phone photos are downscaled
+  // before upload. Small screenshots are left untouched to preserve OCR text.
+  async function prepareImageForUpload(file) {
+    if (!file || file.size <= 2.5 * 1024 * 1024) return file;
+    try {
+      const bitmap = await createImageBitmap(file);
+      const maxSide = 1600;
+      const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+      const width = Math.max(1, Math.round(bitmap.width * scale));
+      const height = Math.max(1, Math.round(bitmap.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height);
+      if (typeof bitmap.close === 'function') bitmap.close();
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.82));
+      return blob && blob.size < file.size ? blob : file;
+    } catch {
+      return file;
+    }
+  }
+
   async function identifyWithServerProxy(file, apiKey) {
+    const uploadFile = await prepareImageForUpload(file);
     const base64 = await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
@@ -1472,7 +1495,7 @@
         resolve(idx >= 0 ? resultStr.slice(idx + 1) : resultStr);
       };
       reader.onerror = reject;
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(uploadFile);
     });
 
     const headers = { 'Content-Type': 'application/json' };
@@ -1485,7 +1508,7 @@
       headers,
       body: JSON.stringify({
         base64,
-        mimeType: file.type || 'image/jpeg',
+        mimeType: uploadFile.type || 'image/jpeg',
       }),
     });
     if (!resp.ok) {

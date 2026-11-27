@@ -31,8 +31,9 @@ const MIME_TYPES = {
 };
 
 const ALLOWED_IMAGE_MIMES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
-const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
-const MAX_IDENTIFY_BODY_BYTES = 6 * 1024 * 1024;
+// Keep the JSON body under Vercel's 4.5 MB request limit after base64 encoding.
+const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
+const MAX_IDENTIFY_BODY_BYTES = 4 * 1024 * 1024;
 const MAX_JSON_BODY_BYTES = 1 * 1024 * 1024;
 const VALID_IDENTIFY_CATEGORIES = new Set([
   'shoes', 'clothes', 'electronics', 'supplements', 'pharmacy_beauty', 'diy_home', 'books', 'general',
@@ -80,16 +81,15 @@ function readJsonBody(req, maxBytes = MAX_JSON_BODY_BYTES) {
     const chunks = [];
     let total = 0;
     let settled = false;
+    let tooLarge = false;
 
     req.on('data', (chunk) => {
       if (settled) return;
       total += chunk.length;
+      // Keep draining the request so the handler can answer 413 cleanly
+      // instead of resetting the socket (which breaks Vercel and tests).
       if (total > maxBytes) {
-        settled = true;
-        const err = new Error('Payload too large');
-        err.statusCode = 413;
-        req.destroy();
-        reject(err);
+        tooLarge = true;
         return;
       }
       chunks.push(chunk);
@@ -98,6 +98,12 @@ function readJsonBody(req, maxBytes = MAX_JSON_BODY_BYTES) {
     req.on('end', () => {
       if (settled) return;
       settled = true;
+      if (tooLarge) {
+        const err = new Error('Payload too large');
+        err.statusCode = 413;
+        reject(err);
+        return;
+      }
       try {
         const raw = Buffer.concat(chunks).toString('utf8');
         resolve(raw ? JSON.parse(raw) : {});
@@ -296,7 +302,7 @@ function createAppServer(deps = {}) {
 
       const byteLen = Buffer.byteLength(rawBase64, 'base64');
       if (byteLen === 0 || byteLen > MAX_IMAGE_BYTES) {
-        return sendJson(res, 413, { error: 'Imaginea depășește limita de 4 MB.' });
+        return sendJson(res, 413, { error: 'Imaginea depășește limita de 3 MB.' });
       }
 
       const tryLocal = async () => normalizeIdentifyResult(
