@@ -1232,7 +1232,10 @@
         sName.textContent = offer.storeName;
         const sProd = document.createElement('span');
         sProd.className = 'store-domain';
-        sProd.textContent = offer.productTitle || offer.title || `${offer.domain} • ${offer.deliveryDays || ''}`;
+        sProd.textContent = [
+          offer.productTitle || offer.title || `${offer.domain} • ${offer.deliveryDays || ''}`,
+          offer.priceNote,
+        ].filter(Boolean).join(' • ');
         storeDiv.append(sName, sProd);
         const badges = buildOfferBadges(offer);
         if (badges.length > 0) {
