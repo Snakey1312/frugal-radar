@@ -10,6 +10,31 @@ module.exports = async function diag(req, res) {
   const q = String(req.query?.q || 'nike air max plus tn negru');
   const base = `https://www.bing.com/shop?q=${encodeURIComponent(q)}&setlang=ro`;
   const market = `${base}&cc=ro&mkt=ro-RO`;
+  const customXff = String(req.query?.xff || '').trim();
+  if (customXff) {
+    const customUrl = req.query?.mkt === '1' ? market : base;
+    const r = await safeFetch(customUrl, {
+      timeoutMs: 6000,
+      headers: { ...BASE_HEADERS, 'X-Forwarded-For': customXff },
+    });
+    const html = r.text || '';
+    const matches = parseBingShoppingHtml(html);
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.end(JSON.stringify([{
+      name: `custom:${customXff}:mkt=${req.query?.mkt === '1'}`,
+      status: r.status,
+      ok: Boolean(r.ok),
+      error: r.error || null,
+      len: html.length,
+      offLinks: (html.match(/br-offLink/g) || []).length,
+      prices: (html.match(/br-price/g) || []).length,
+      parsed: matches.length,
+      sample: matches.slice(0, 6).map((m) => `${m.title} | ${m.priceLabel} -> ${m.price} | ${m.customStoreName}`),
+    }]));
+    return;
+  }
+
   const variants = [
     ['plain', base, {}],
     ['cc_mkt', market, {}],
