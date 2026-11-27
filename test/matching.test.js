@@ -213,15 +213,35 @@ test('UGG Lowmel camel query rejects other models, colors and kids listings', ()
   assert.equal(exact.rejected, false);
   assert.equal(exact.variantBucket, 'exact_variant');
 
+  const tanSynonym = scoreCandidate('UGG W Lo Lowmel Tan, pantofi sport dama', query, {
+    category: 'shoes', price: 599,
+  });
+  assert.equal(tanSynonym.rejected, false);
+  assert.equal(tanSynonym.variantBucket, 'exact_variant');
+
   for (const wrong of [
     'UGG Lowmel Negru, pantofi sport dama',
     'UGG Classic Ultra Mini Camel, pantofi dama',
     'UGG Lowmel Camel, pantofi sport copii',
+    'UGG K Sneakers Lowmel Spotted Tan',
+    'UGG Lowmel, pantofi sport dama',
+    'Pantofi sport femei UGG Lowmel, 80 articole',
     'Nike Air Max Plus TN Camel, pantofi sport dama',
   ]) {
     const scored = scoreCandidate(wrong, query, { category: 'shoes', price: 599 });
     assert.equal(scored.rejected, true, `should reject ${wrong}`);
   }
+
+  const wrongSize = scoreCandidate('UGG W Lo Lowmel Camel EUR 41', query, {
+    category: 'shoes', price: 615, desiredSize: '38',
+  });
+  assert.equal(wrongSize.rejected, true);
+  assert.equal(wrongSize.rejectReason, 'size_mismatch');
+
+  const rightSize = scoreCandidate('UGG Lowmel Camel, marimea 38', query, {
+    category: 'shoes', price: 625.5, desiredSize: '38',
+  });
+  assert.equal(rightSize.rejected, false);
 });
 
 test('Serper eMAG refill offers stay in the main list for accessory queries', () => {
