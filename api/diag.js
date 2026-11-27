@@ -1,40 +1,36 @@
-// Temporary diagnostic: which Romanian store hosts accept Vercel egress?
+// Temporary diagnostic: can keyless reader/proxy services fetch eMAG?
 const https = require('node:https');
 
-function rawGet(host, path, timeoutMs = 6000) {
+function rawGet(url, timeoutMs = 12000) {
   return new Promise((resolve) => {
     const t0 = Date.now();
-    const req = https.get({ host, path, timeout: timeoutMs, headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36' } }, (res) => {
-      res.resume();
-      res.on('end', () => resolve({ status: res.statusCode, ms: Date.now() - t0, server: res.headers.server }));
+    const req = https.get(url, { timeout: timeoutMs, headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'text/plain,*/*' } }, (res) => {
+      const chunks = [];
+      res.on('data', (c) => { if (chunks.length < 5) chunks.push(c); });
+      res.on('end', () => resolve({
+        status: res.statusCode,
+        ms: Date.now() - t0,
+        len: chunks.reduce((a, c) => a + c.length, 0),
+        body: Buffer.concat(chunks).toString('utf8').slice(0, 300),
+      }));
     });
     req.on('timeout', () => { req.destroy(); resolve({ error: 'timeout', ms: Date.now() - t0 }); });
     req.on('error', (e) => resolve({ error: e.message, ms: Date.now() - t0 }));
   });
 }
 
-const HOSTS = [
-  ['www.emag.ro', '/search/nike%20air%20max%20plus%20tn%20negru'],
-  ['altex.ro', '/cautare/nike'],
-  ['www.pcgarage.ro', '/cautare/nike/'],
-  ['www.flanco.ro', '/catalogsearch/result/?q=nike'],
-  ['www.vexio.ro', '/search?q=nike'],
-  ['www.evomag.ro', '/cautare/nike'],
-  ['www.sportisimo.ro', '/cauta/?q=nike'],
-  ['sizeer.ro', '/cautare?query=nike'],
-  ['www.intersport.ro', '/cauta/?q=nike'],
-  ['www.hervis.ro', '/shop/search/?text=nike'],
-  ['www.gymbeam.ro', '/cautare?q=nike'],
-  ['www.decathlon.ro', '/search?Ntt=nike'],
-  ['www.kaufland.ro', '/cautare?search=nike'],
-  ['www.carrefour.ro', '/search?text=nike'],
-  ['www.dedeman.ro', '/ro/cautare/nike'],
-  ['www.carturesti.ro', '/cautare?q=nike'],
-];
+const EMAG = 'https://www.emag.ro/search/nike%20air%20max%20plus%20tn%20negru';
+const URLS = {
+  jina: `https://r.jina.ai/${EMAG}`,
+  allorigins: `https://api.allorigins.win/raw?url=${encodeURIComponent(EMAG)}`,
+  corsproxy: `https://corsproxy.io/?url=${encodeURIComponent(EMAG)}`,
+  codetabs: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(EMAG)}`,
+  thingproxy: `https://thingproxy.freeboard.io/fetch/${EMAG}`,
+};
 
 module.exports = async (req, res) => {
   const out = {};
-  for (const [host, path] of HOSTS) out[host] = await rawGet(host, path);
+  for (const [k, url] of Object.entries(URLS)) out[k] = await rawGet(url);
   res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify(out, null, 2));
 };
