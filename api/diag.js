@@ -1,49 +1,29 @@
-// Temporary diagnostic: probe runtime capabilities on Vercel.
+// Temporary diagnostic: probe outbound network from Vercel.
+const https = require('node:https');
+
+function rawGet(host, path) {
+  return new Promise((resolve) => {
+    const t0 = Date.now();
+    const req = https.get({ host, path, timeout: 8000, headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
+      res.resume();
+      res.on('end', () => resolve({ status: res.statusCode, ms: Date.now() - t0 }));
+    });
+    req.on('timeout', () => { req.destroy(); resolve({ error: 'timeout', ms: Date.now() - t0 }); });
+    req.on('error', (e) => resolve({ error: e.message, ms: Date.now() - t0 }));
+  });
+}
+
 module.exports = async (req, res) => {
-  const out = { node: process.version, checks: {} };
-  const finish = () => {
-    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify(out, null, 2));
-  };
-
-  try {
-    const { Impit } = require('impit');
-    out.checks.impitRequire = 'ok';
-    const client = new Impit({ browser: 'chrome', followRedirects: false });
-    const t0 = Date.now();
-    const r = await client.fetch('https://www.emag.ro/search/nike%20air%20max%20tn%20triple%20black', {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-    });
-    out.checks.impitFetch = { status: r.status, ms: Date.now() - t0 };
-  } catch (e) {
-    out.checks.impitRequire = 'fail';
-    out.checks.impitError = String(e && e.message || e);
+  const out = { node: process.version, env: { VERCEL: process.env.VERCEL }, hosts: {} };
+  for (const [host, path] of [
+    ['example.com', '/'],
+    ['www.google.com', '/'],
+    ['www.emag.ro', '/search/nike%20air%20max%20tn%20triple%20black'],
+    ['fenrir.altex.ro', '/v2/catalog/search/nike?size=10'],
+    ['api.github.com', '/'],
+  ]) {
+    out.hosts[host] = await rawGet(host, path);
   }
-
-  try {
-    const { safeFetch } = require('../lib/http-client');
-    const t0 = Date.now();
-    const r = await safeFetch('https://www.emag.ro/search/nike%20air%20max%20tn%20triple%20black', {
-      timeoutMs: 10000,
-      maxBytes: 2 * 1024 * 1024,
-    });
-    out.checks.safeFetch = { status: r.status, ms: Date.now() - t0 };
-  } catch (e) {
-    out.checks.safeFetch = { error: String(e && e.message || e) };
-  }
-
-  try {
-    const { storeFetch } = require('../lib/http-client');
-    const t0 = Date.now();
-    const r = await storeFetch('emag', 'https://www.emag.ro/search/nike%20air%20max%20tn%20triple%20black', {
-      timeoutMs: 10000,
-      maxBytes: 2 * 1024 * 1024,
-      useImpit: true,
-    });
-    out.checks.storeFetch = { status: r.status, transport: r.transport, ms: Date.now() - t0 };
-  } catch (e) {
-    out.checks.storeFetch = { error: String(e && e.message || e) };
-  }
-
-  finish();
+  res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify(out, null, 2));
 };
