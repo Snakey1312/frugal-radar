@@ -4,7 +4,7 @@
   "functions": {
     "api/[...path].js": {
       "maxDuration": 60,
-      "includeFiles": "{data/**,lib/**,public/**,server.js,scripts/**}"
+      "includeFiles": "data/stores.json"
     }
   }
 }
