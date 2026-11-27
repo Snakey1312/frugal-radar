@@ -1586,6 +1586,8 @@
   async function handleImageFile(file) {
     if (!file || !file.type.startsWith('image/')) return;
 
+    state.currentOcrAudience = '';
+    state.ocrBaseQuery = '';
     revokeCurrentPhotoUrl();
     const objectUrl = URL.createObjectURL(file);
     state.currentPhotoObjectUrl = objectUrl;
