@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>FrugalRadar — Comparator inteligent de prețuri în România</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="brand" aria-label="FrugalRadar Acasă">
+        <span class="brand-mark" aria-hidden="true">◎</span>
+        <span class="brand-text">
+          <strong>FrugalRadar</strong>
+          <small>Preț real + Transport + Stoc mărime</small>
+        </span>
+      </a>
+      <div class="header-actions">
+        <span class="pill-badge" id="stores-count-badge">15 magazine RO</span>
+        <button type="button" class="btn-ghost" id="open-settings-btn" aria-haspopup="dialog">
+          <span aria-hidden="true">⚙</span> Setări AI
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <section class="hero-section" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <h1 id="hero-title">Plătești cel mai mic <span class="highlight">cost total real</span>, nu doar cel mai mic preț afișat.</h1>
+        <p class="hero-subtitle">
+          Încarcă un link, o poză sau numele produsului. Calculăm automat transportul (easybox / curier), taxa de ramburs, abonamentul Genius și verificăm dacă <strong>mărimea ta</strong> este în stoc pe site-urile românești.
+        </p>
+      </div>
+
+      <div class="search-card">
+        <div class="tabs" id="input-tabs">
+          <div role="tablist" aria-label="Mod de căutare produs" class="tablist">
+            <button type="button" role="tab" id="tab-name" aria-selected="true" tabindex="0">
+              <span aria-hidden="true">🔎</span> Nume produs
+            </button>
+            <button type="button" role="tab" id="tab-link" aria-selected="false" tabindex="-1">
+              <span aria-hidden="true">🔗</span> Link produs
+            </button>
+            <button type="button" role="tab" id="tab-photo" aria-selected="false" tabindex="-1">
+              <span aria-hidden="true">📷</span> Poză / Screenshot
+            </button>
+          </div>
+
+          <!-- Panel 1: Nume produs -->
+          <div role="tabpanel" id="panel-name" aria-labelledby="tab-name" tabindex="0">
+            <div class="panel-inner">
+              <form id="form-name" class="search-form" novalidate>
+                <div class="field">
+                  <label for="product-name-input">Ce produs cauți?</label>
+                  <span id="name-hint" class="hint">Exemplu: Nike Air Force 1 '07, Geacă The North Face Nuptse, iPhone 15 128GB</span>
+                  <div class="input-row">
+                    <input
+                      type="text"
+                      id="product-name-input"
+                      name="query"
+                      required
+                      minlength="2"
+                      placeholder="Scrie numele exact sau modelul produsului..."
+                      aria-describedby="name-hint"
+                      data-error="name-error"
+                    >
+                    <button type="submit" class="btn-primary">Caută peste tot</button>
+                  </div>
+                  <div id="name-error" class="error-msg">
+                    <span role="img" aria-label="Eroare">⚠</span> Introdu numele produsului (minim 2 caractere).
+                  </div>
+                </div>
+              </form>
+
+              <div class="quick-examples" aria-label="Exemple rapide">
+                <span class="examples-label">Încearcă rapid:</span>
+                <button type="button" class="chip-btn" data-example="Nike Air Force 1 '07" data-cat="shoes" data-size="42">👟 Nike Air Force 1 (42)</button>
+                <button type="button" class="chip-btn" data-example="Geacă The North Face Nuptse" data-cat="clothes" data-size="L">🧥 Geacă North Face (L)</button>
+                <button type="button" class="chip-btn" data-example="Apple iPhone 15 128GB" data-cat="electronics">📱 iPhone 15 128GB</button>
+                <button type="button" class="chip-btn" data-example="Asics Gel-Kayano 30" data-cat="shoes" data-size="43">🏃 Asics Gel-Kayano 30 (43)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 2: Link produs -->
+          <div role="tabpanel" id="panel-link" aria-labelledby="tab-link" hidden="until-found">
+            <div class="panel-inner">
+              <form id="form-link" class="search-form" novalidate>
+                <div class="field">
+                  <label for="product-url-input">Lipește link-ul produsului</label>
+                  <span id="url-hint" class="hint">Suportă eMAG, Fashion Days, Answear, epantofi, About You, Altex, Decathlon etc.</span>
+                  <div class="input-row">
+                    <input
+                      type="url"
+                      id="product-url-input"
+                      name="url"
+                      required
+                      placeholder="https://www.emag.ro/..."
+                      aria-describedby="url-hint"
+                      data-error="url-error"
+                    >
+                    <button type="submit" class="btn-primary">Extrage &amp; Compară</button>
+                  </div>
+                  <div id="url-error" class="error-msg">
+                    <span role="img" aria-label="Eroare">⚠</span> Introdu un link valid care începe cu https:// sau http://.
+                  </div>
+                </div>
+              </form>
+              <div id="url-preview-box" class="extracted-preview" hidden></div>
+            </div>
+          </div>
+
+          <!-- Panel 3: Poza / Screenshot -->
+          <div role="tabpanel" id="panel-photo" aria-labelledby="tab-photo" hidden="until-found">
+            <div class="panel-inner">
+              <form id="form-photo" class="search-form" novalidate>
+                <div class="dropzone" id="photo-dropzone">
+                  <input
+                    type="file"
+                    id="photo-file-input"
+                    accept="image/*"
+                    class="dropzone-input"
+                    aria-label="Încarcă o poză cu produsul"
+                  >
+                  <div class="dropzone-empty" id="dropzone-empty">
+                    <span class="dropzone-icon" aria-hidden="true">📸</span>
+                    <p><strong>Trage o poză aici</strong>, apasă pentru a alege un fișier sau lipește cu <kbd>Ctrl+V</kbd></p>
+                    <small>PNG, JPG, WebP — poți folosi inclusiv un screenshot de pe telefon</small>
+                  </div>
+                  <div class="dropzone-preview" id="dropzone-preview" hidden>
+                    <img id="photo-preview-img" alt="Previzualizare produs încărcat">
+                    <div class="dropzone-meta">
+                      <span id="photo-file-name" class="file-name"></span>
+                      <span id="photo-ai-status" class="ai-status"></span>
+                      <button type="button" class="btn-ghost btn-sm" id="clear-photo-btn">Schimbă poza</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field photo-confirm-field">
+                  <label for="photo-query-input">Nume produs detectat / confirmat din poză</label>
+                  <span id="photo-hint" class="hint">Poți ajusta numele detectat înainte să căutăm pe toate site-urile din România.</span>
+                  <div class="input-row">
+                    <input
+                      type="text"
+                      id="photo-query-input"
+                      required
+                      minlength="2"
+                      placeholder="Ex: Adidas Samba OG White Black"
+                      aria-describedby="photo-hint"
+                      data-error="photo-error"
+                    >
+                    <button type="submit" class="btn-primary">Caută produsul</button>
+                  </div>
+                  <div id="photo-error" class="error-msg">
+                    <span role="img" aria-label="Eroare">⚠</span> Confirmă sau scrie numele produsului din poză (minim 2 caractere).
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Frugal Options Bar -->
+        <div class="options-bar" aria-label="Preferințe de calcul frugal și mărime">
+          <div class="option-group">
+            <label for="category-select">Categorie</label>
+            <select id="category-select">
+              <option value="auto">Auto-detectare</option>
+              <option value="shoes">Încălțăminte</option>
+              <option value="clothes">Haine</option>
+              <option value="electronics">Electronice / IT</option>
+              <option value="supplements">Suplimente / Sport</option>
+              <option value="general">General / Casă</option>
+            </select>
+          </div>
+
+          <div class="option-group" id="size-option-group">
+            <label for="size-select">Mărimea mea</label>
+            <select id="size-select">
+              <option value="">Toate mărimile</option>
+            </select>
+          </div>
+
+          <div class="option-group">
+            <label for="delivery-select">Livrare</label>
+            <select id="delivery-select">
+              <option value="easybox">Easybox / Locker</option>
+              <option value="courier">Curier la ușă</option>
+            </select>
+          </div>
+
+          <div class="option-group">
+            <label for="payment-select">Plată</label>
+            <select id="payment-select">
+              <option value="card">Card online (0 lei ramburs)</option>
+              <option value="ramburs">Ramburs la curier</option>
+            </select>
+          </div>
+
+          <div class="option-group">
+            <label for="voucher-input">Voucher (%)</label>
+            <input type="number" id="voucher-input" min="0" max="50" step="1" value="0">
+          </div>
+
+          <div class="option-checks">
+            <label class="checkbox-label">
+              <input type="checkbox" id="genius-emag"> eMAG Genius
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="genius-fashion"> Fashion Days Genius
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results-section" class="results-section" hidden aria-live="polite">
+      <div id="winner-card" class="winner-card"></div>
+
+      <div class="results-toolbar">
+        <div class="results-summary">
+          <h2 id="results-heading">Comparație magazine din România</h2>
+          <p id="results-subhead" class="muted"></p>
+        </div>
+        <div class="results-filters">
+          <label class="checkbox-label" id="only-in-stock-wrap">
+            <input type="checkbox" id="only-in-stock-toggle" checked>
+            Doar cu mărimea mea în stoc
+          </label>
+        </div>
+      </div>
+
+      <div tabindex="0" role="region" aria-labelledby="results-table-caption" class="table-wrapper">
+        <table id="results-table">
+          <caption id="results-table-caption" class="visually-hidden">
+            Oferte comparate pe site-urile românești, ordonate după costul total real cu transport și ramburs
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Magazin</th>
+              <th scope="col">Preț produs</th>
+              <th scope="col">Transport</th>
+              <th scope="col">Ramburs</th>
+              <th scope="col">Cost Total Real</th>
+              <th scope="col">Stoc &amp; Mărime</th>
+              <th scope="col">Acțiune</th>
+            </tr>
+          </thead>
+          <tbody id="results-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>FrugalRadar — Calculator de cost total real (Preț + Transport + Ramburs + Stoc Mărime) pentru magazinele din România.</p>
+      <p class="muted">Prețurile și disponibilitatea mărimilor sunt estimate/extrase inteligent; verifică întotdeauna pagina magazinului înainte de comandă.</p>
+    </div>
+  </footer>
+
+  <!-- Settings Modal -->
+  <dialog id="settings-dialog" class="modal-dialog" aria-labelledby="settings-title">
+    <form method="dialog" class="modal-content">
+      <div class="modal-header">
+        <h2 id="settings-title">Setări Căutare Globală &amp; AI (Opțional)</h2>
+        <button type="submit" class="btn-ghost btn-sm" aria-label="Închide">✕</button>
+      </div>
+      <p class="muted">
+        Fără chei API, aplicația caută automat pe site-urile care permit acces direct (eMAG, Altex, GymBeam, Fashion Days, Zalando). Pentru a căuta simultan pe <strong>TOATE site-urile din România</strong> prin Google Shopping (Trendyol, Dr.Max, Notino, epantofi, Answear etc.), poți adăuga o cheie gratuită <strong>Serper.dev</strong> (2.500 căutări gratuite).
+      </p>
+      <div class="field">
+        <label for="serper-key-input">Serper.dev API Key (Google Shopping România)</label>
+        <input type="password" id="serper-key-input" placeholder="Cheie de pe serper.dev...">
+      </div>
+      <div class="field">
+        <label for="gemini-key-input">Gemini API Key (Recunoaștere produs din poză)</label>
+        <input type="password" id="gemini-key-input" placeholder="AIza...">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="clear-key-btn">Șterge cheile</button>
+        <button type="button" class="btn-primary" id="save-key-btn">Salvează</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
