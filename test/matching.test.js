@@ -178,6 +178,32 @@ test('scoreCandidate keeps specific sneaker families distinct and treats Air Max
   }
 });
 
+test('scoreCandidate keeps accessory queries distinct from the main device', () => {
+  const query = 'rezerve philips oneblade pro 360';
+
+  const refill = scoreCandidate('Rezerve Philips OneBlade Pro 360 QP620/50, 2 bucati', query);
+  assert.equal(refill.rejected, false);
+  assert.ok(refill.score >= 0.9);
+
+  const capete = scoreCandidate('Capete de rezerva Philips Oneblade 360 QP440/50, kit 4 lame', query);
+  assert.equal(capete.rejected, false);
+  const inlocuire = scoreCandidate('Capete de inlocuire Philips OneBlade 360 QP430/50, 3 bucati', query);
+  assert.equal(inlocuire.rejected, false);
+
+  const wrongGeneration = scoreCandidate('Philips Oneblade QP240/50 Rezerva Lama 4 Buc', query);
+  assert.equal(wrongGeneration.rejected, true);
+
+  for (const title of [
+    'Philips OneBlade Pro 360 QP6530/30 - aparat de ras',
+    'Aparat De Tuns Si Barbierit Philips Oneblade Pro 360 QP6542/15, 2 Lame 360',
+    'Philips OneBlade Pro 360 QP6552/30 Trimmer Pentru Fata Si Corp 1 Buc',
+  ]) {
+    const device = scoreCandidate(title, query);
+    assert.equal(device.rejected, true, `should reject main device ${title}`);
+    assert.equal(device.rejectReason, 'main_product_mismatch');
+  }
+});
+
 test('canonicalizeUrl, extractStoreProductKey, buildClusterKey, and distillQuery work accurately', () => {
   const canon = canonicalizeUrl('https://WWW.eMAG.ro/telefon-apple/pd/D123ABC/?utm_source=google&fbclid=xyz&variant=black&id=99#reviews');
   assert.equal(canon, 'https://emag.ro/telefon-apple/pd/D123ABC?id=99&variant=black');

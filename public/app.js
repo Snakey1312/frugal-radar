@@ -1518,6 +1518,51 @@
     return resp.json();
   }
 
+  // Browser-side OCR keeps photo recognition keyless on Vercel: serverless WASM
+  // init hangs there, while the browser already has a working WASM runtime.
+  let browserOcrWorkerPromise = null;
+
+  function getBrowserOcrWorker() {
+    if (!browserOcrWorkerPromise) {
+      const Tesseract = window.Tesseract;
+      if (!Tesseract || typeof Tesseract.createWorker !== 'function') {
+        throw new Error('OCR nu este disponibil în acest browser.');
+      }
+      browserOcrWorkerPromise = Tesseract.createWorker('eng', 1, {
+        workerPath: '/vendor/tesseract/worker.min.js',
+        corePath: '/vendor/tesseract/',
+        langPath: '/vendor/tesseract/',
+        workerBlobURL: false,
+        logger: () => {},
+      }).catch((err) => {
+        browserOcrWorkerPromise = null;
+        throw err;
+      });
+    }
+    return browserOcrWorkerPromise;
+  }
+
+  async function identifyWithBrowserOcr(file) {
+    const parser = window.FrugalOcrParse;
+    if (!parser || typeof parser.buildResult !== 'function') {
+      throw new Error('Parserul OCR nu este disponibil.');
+    }
+    const worker = await getBrowserOcrWorker();
+    const prepared = await prepareImageForUpload(file);
+    const { data } = await worker.recognize(prepared);
+    const lines = String(data?.text || '')
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const parsed = parser.buildResult(lines);
+    if (!parsed) return null;
+    return {
+      ...parsed,
+      source: 'local_ocr',
+      needsConfirmation: parsed.confidence < 0.75,
+    };
+  }
+
   async function handleImageFile(file) {
     if (!file || !file.type.startsWith('image/')) return;
 
@@ -1537,11 +1582,13 @@
     const apiKey = getStoredKey(GEMINI_KEY_STORAGE);
     photoAiStatus.textContent = apiKey
       ? '✨ Se identifică produsul cu Gemini Vision...'
-      : '✨ Se citește textul vizibil din imagine (OCR local)...';
+      : '✨ Se citește textul din imagine (OCR în browser)...';
 
     try {
-      const result = await identifyWithServerProxy(file, apiKey);
-      if (result.query) {
+      const result = apiKey
+        ? await identifyWithServerProxy(file, apiKey)
+        : await identifyWithBrowserOcr(file);
+      if (result?.query) {
         photoQueryInput.value = result.query;
         const label = result.source === 'local_ocr' ? 'Identificat din imagine' : 'Identificat automat';
         const confirmHint = result.needsConfirmation ? ' — confirmă mai jos' : '';
@@ -1549,11 +1596,11 @@
       } else {
         photoAiStatus.textContent = 'Poți scrie sau confirma numele produsului mai jos.';
       }
-      if (result.category && categorySelect.value === 'auto') {
+      if (result?.category && categorySelect.value === 'auto') {
         categorySelect.value = result.category;
         updateSizeSelector(result.category, String(result.size || '').replace(/^eu\s*/i, '').trim());
       }
-      if (result.size && categorySelect.value !== 'auto') {
+      if (result?.size && categorySelect.value !== 'auto') {
         const detectedSize = String(result.size).replace(/^eu\s*/i, '').trim();
         if ([...sizeSelect.options].some((opt) => opt.value === detectedSize)) {
           sizeSelect.value = detectedSize;
@@ -1562,7 +1609,7 @@
     } catch (err) {
       photoAiStatus.textContent = apiKey
         ? 'Nu am putut identifica automat produsul. Confirmă numele mai jos.'
-        : `Nu am putut citi produsul din imagine. ${err?.message || 'Scrie numele manual sau adaugă o cheie Gemini în Setări AI.'}`;
+        : `Nu am putut citi produsul din imagine. ${err?.message || 'Scrie numele manual.'}`;
     }
   }
 
