@@ -751,7 +751,8 @@
         "scraperConfig": {
           "graphqlUrl": "https://gymbeam.ro/graphql",
           "baseUrl": "https://gymbeam.ro",
-          "urlSuffix": ".html"
+          "urlSuffix": ".html",
+          "headers": { "Store": "gymbeamro" }
         }
       }
     },

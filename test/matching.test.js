@@ -102,6 +102,11 @@ test('scoreCandidate enforces hard gates, RO/EN synonyms, ±5% tolerance, and un
   assert.equal(modHit.rejected, true);
   assert.equal(modHit.rejectReason, 'modifier_mismatch');
 
+  // 5G in RO phone listing must NOT fail modifier gate when omitted from query
+  const fiveGHit = scoreCandidate('Telefon mobil Apple iPhone 15, 128GB, 5G, Blue', 'iPhone 15 128GB');
+  assert.equal(fiveGHit.rejected, false);
+  assert.equal(fiveGHit.variantBucket, 'exact_variant');
+
   // Numeric model gate (15 vs 1500 or 30 vs 29)
   const numHit = scoreCandidate('Asics Gel Kayano 29', 'Asics Gel Kayano 30');
   assert.equal(numHit.rejected, true);
