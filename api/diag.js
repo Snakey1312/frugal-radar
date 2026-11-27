@@ -1,46 +1,28 @@
-// Temporary diagnostic: isolate Tesseract worker hang on Vercel.
-const fs = require('node:fs');
-const path = require('node:path');
-const { Worker } = require('node:worker_threads');
+// Temporary diagnostic: full traineddata download timing on Vercel.
+const https = require('node:https');
 
-function withTimeout(p, ms) {
-  return Promise.race([p, new Promise((r) => setTimeout(() => r({ error: 'outer timeout' }), ms))]);
+const URLS = {
+  best_int: 'https://cdn.jsdelivr.net/npm/@tesseract.js-data/eng/4.0.0_best_int/eng.traineddata.gz',
+  standard: 'https://cdn.jsdelivr.net/npm/@tesseract.js-data/eng/4.0.0/eng.traineddata.gz',
+};
+
+function download(url, timeoutMs = 25000) {
+  return new Promise((resolve) => {
+    const t0 = Date.now();
+    let bytes = 0;
+    const req = https.get(url, { timeout: timeoutMs }, (res) => {
+      res.on('data', (c) => { bytes += c.length; });
+      res.on('end', () => resolve({ status: res.statusCode, bytes, ms: Date.now() - t0 }));
+      res.on('aborted', () => resolve({ error: 'aborted', bytes, ms: Date.now() - t0 }));
+    });
+    req.on('timeout', () => { req.destroy(); resolve({ error: 'timeout', bytes, ms: Date.now() - t0 }); });
+    req.on('error', (e) => resolve({ error: e.message, bytes, ms: Date.now() - t0 }));
+  });
 }
 
 module.exports = async (req, res) => {
   const out = {};
-
-  // 1. Is tesseract.js-core present and resolvable?
-  try {
-    const coreDir = path.join(process.cwd(), 'node_modules', 'tesseract.js-core');
-    out.coreDir = { exists: fs.existsSync(coreDir), files: fs.existsSync(coreDir) ? fs.readdirSync(coreDir).slice(0, 12) : [] };
-    const simdPath = path.join(coreDir, 'tesseract-core-simd-lstm.js');
-    out.simdCore = { exists: fs.existsSync(simdPath), size: fs.existsSync(simdPath) ? fs.statSync(simdPath).size : 0 };
-    const wasmDir = path.join(coreDir, 'wasm');
-    out.wasm = { exists: fs.existsSync(wasmDir), files: fs.existsSync(wasmDir) ? fs.readdirSync(wasmDir).slice(0, 20) : [] };
-  } catch (e) { out.coreDir = { error: e.message }; }
-
-  // 2. Do plain worker_threads work at all?
-  out.plainWorker = await withTimeout(new Promise((resolve) => {
-    try {
-      const w = new Worker('require("node:worker_threads").parentPort.postMessage("hi")', { eval: true });
-      w.on('message', (m) => { w.terminate(); resolve({ ok: true, message: m }); });
-      w.on('error', (e) => resolve({ error: e.message }));
-      setTimeout(() => { w.terminate(); resolve({ error: 'no message in 5s' }); }, 5000);
-    } catch (e) { resolve({ error: e.message }); }
-  }), 8000);
-
-  // 3. Can the real worker script be instantiated?
-  out.realWorker = await withTimeout(new Promise((resolve) => {
-    try {
-      const wp = path.join(process.cwd(), 'node_modules', 'tesseract.js', 'src', 'worker-script', 'node', 'index.js');
-      const w = new Worker(wp);
-      w.on('online', () => { resolve({ online: true }); });
-      w.on('error', (e) => resolve({ error: e.message }));
-      setTimeout(() => { w.terminate(); resolve({ error: 'no online in 8s' }); }, 8000);
-    } catch (e) { resolve({ error: e.message }); }
-  }), 10000);
-
+  for (const [k, u] of Object.entries(URLS)) out[k] = await download(u);
   res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify(out, null, 2));
 };
