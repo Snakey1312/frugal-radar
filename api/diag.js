@@ -1,28 +1,37 @@
-// Temporary diagnostic: Tesseract init variants on Vercel.
+// Temporary diagnostic: does Emscripten Core init work in main thread vs worker?
 function withTimeout(p, ms) {
   return Promise.race([p, new Promise((r) => setTimeout(() => r({ error: 'outer timeout' }), ms))]);
 }
 
-async function tryVariant(name, opts) {
-  const events = [];
-  const t0 = Date.now();
-  try {
-    const { createWorker } = require('tesseract.js');
-    const maybe = await withTimeout(createWorker('eng', 1, { ...opts, logger: (m) => events.push(`${m.status}:${m.progress ?? ''}`) }), 12000);
-    if (maybe && maybe.error) return { [name]: { error: maybe.error, events } };
-    const out = { [name]: { ok: true, ms: Date.now() - t0, events } };
-    if (maybe) await maybe.terminate().catch(() => {});
-    return out;
-  } catch (e) {
-    return { [name]: { error: String(e && e.message || e), events } };
-  }
-}
-
 module.exports = async (req, res) => {
   const out = {};
-  Object.assign(out, await tryVariant('cacheTmp', { cachePath: '/tmp' }));
-  Object.assign(out, await tryVariant('noCache', { cachePath: '/tmp', cacheMethod: 'none' }));
-  Object.assign(out, await tryVariant('default', {}));
+
+  out.mainThread = await withTimeout((async () => {
+    const t0 = Date.now();
+    try {
+      const Core = require('tesseract.js-core/tesseract-core-simd-lstm');
+      const mod = await Core({});
+      return { ok: true, ms: Date.now() - t0, hasInit: typeof mod._Init === 'function' || typeof mod.cwrap === 'function' };
+    } catch (e) { return { error: String(e && e.message || e), ms: Date.now() - t0 }; }
+  })(), 15000);
+
+  out.workerThread = await withTimeout(new Promise((resolve) => {
+    const t0 = Date.now();
+    try {
+      const { Worker } = require('node:worker_threads');
+      const code = `
+        const { parentPort } = require('node:worker_threads');
+        const Core = require('tesseract.js-core/tesseract-core-simd-lstm');
+        Core({}).then((m) => parentPort.postMessage({ ok: true, hasCwrap: typeof m.cwrap === 'function' }))
+          .catch((e) => parentPort.postMessage({ error: String(e && e.message || e) }));
+      `;
+      const w = new Worker(code, { eval: true });
+      w.on('message', (m) => { w.terminate(); resolve({ ...m, ms: Date.now() - t0 }); });
+      w.on('error', (e) => resolve({ error: e.message, ms: Date.now() - t0 }));
+      setTimeout(() => { w.terminate(); resolve({ error: 'no message in 12s', ms: Date.now() - t0 }); }, 12000);
+    } catch (e) { resolve({ error: e.message }); }
+  }), 15000);
+
   res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify(out, null, 2));
 };
