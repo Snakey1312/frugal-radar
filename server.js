@@ -268,6 +268,7 @@ function createAppServer(deps = {}) {
         urls: body.urls,
         category: body.category || 'shoes',
         desiredSize: body.desiredSize || body.size || '',
+        debug: body.debug === true,
       });
       return sendJson(res, 200, result);
     } catch (err) {
