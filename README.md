@@ -39,8 +39,10 @@ Aplicația e deja configurată pentru Vercel:
    din Vercel. Serper oferă 2.500 de căutări gratuite și aduce rezultate Google
    Shopping România, inclusiv prețurile reale de pe eMAG, direct în lista
    principală. Cheia se poate adăuga și din **Setări** în aplicație (doar pentru
-   browserul respectiv). Fără cheie, eMAG rămâne doar în secțiunea de linkuri
-   manuale, pentru că blochează IP-urile Vercel.
+   browserul respectiv). Fără cheie, oferta eMAG cea mai ieftină rămâne în lista
+   principală ca captură datată (27.11.2026), cu stoc nemarcat ca verificat;
+   eMAG blochează IP-urile Vercel, deci prețul nu poate fi reîmprospătat live
+   fără Google Shopping.
 5. (Opțional) `GEMINI_API_KEY` nu mai e necesar: OCR-ul din poză rulează local în
    browser.
 
