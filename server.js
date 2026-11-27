@@ -6,6 +6,7 @@ const { URL } = require('node:url');
 const { cache } = require('./lib/cache');
 const { safeFetch } = require('./lib/http-client');
 const { getPublicStoresSummary } = require('./lib/adapters');
+const { identifyImageLocally } = require('./lib/local-ocr');
 const {
   runSearchPipeline,
   checkStockBatch,
@@ -33,6 +34,9 @@ const ALLOWED_IMAGE_MIMES = new Set(['image/jpeg', 'image/png', 'image/webp', 'i
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const MAX_IDENTIFY_BODY_BYTES = 6 * 1024 * 1024;
 const MAX_JSON_BODY_BYTES = 1 * 1024 * 1024;
+const VALID_IDENTIFY_CATEGORIES = new Set([
+  'shoes', 'clothes', 'electronics', 'supplements', 'pharmacy_beauty', 'diy_home', 'books', 'general',
+]);
 
 const SECURITY_HEADERS = {
   'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: blob: data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'",
@@ -63,6 +67,15 @@ function createRateLimiter({ windowMs = 10 * 60 * 1000, maxRequests = 12 } = {})
 }
 
 function readJsonBody(req, maxBytes = MAX_JSON_BODY_BYTES) {
+  // Vercel may hand us an already-parsed body; plain Node streams it instead.
+  if (req.body !== undefined && req.body !== null) {
+    try {
+      const parsed = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+      return Promise.resolve(parsed);
+    } catch {
+      return Promise.reject(Object.assign(new Error('Invalid JSON payload'), { statusCode: 400 }));
+    }
+  }
   return new Promise((resolve, reject) => {
     const chunks = [];
     let total = 0;
@@ -185,12 +198,31 @@ function getHeaderString(req, headerName) {
   return val ? String(val).trim() : '';
 }
 
+function normalizeIdentifyResult(result, source) {
+  if (!result || !String(result.query || '').trim()) return null;
+  const category = VALID_IDENTIFY_CATEGORIES.has(String(result.category || '').trim())
+    ? String(result.category).trim()
+    : 'general';
+  const confidence = Number.isFinite(Number(result.confidence))
+    ? Math.max(0, Math.min(1, Number(result.confidence)))
+    : null;
+  return {
+    query: String(result.query).trim().slice(0, 160),
+    category,
+    size: String(result.size || '').trim().slice(0, 20),
+    source,
+    confidence,
+    needsConfirmation: confidence == null ? source === 'local_ocr' : confidence < 0.8,
+  };
+}
+
 function createAppServer(deps = {}) {
   const _runSearch = deps.runSearchPipeline || runSearchPipeline;
   const _checkStockBatch = deps.checkStockBatch || checkStockBatch;
   const _analyzeUrl = deps.analyzeProductUrl || analyzeProductUrl;
   const _getStoresSummary = deps.getPublicStoresSummary || getPublicStoresSummary;
   const _safeFetch = deps.safeFetch || safeFetch;
+  const _localIdentify = deps.localImageIdentifier || identifyImageLocally;
   const _publicDir = deps.publicDir ? path.resolve(deps.publicDir) : PUBLIC_DIR;
   const _checkIdentifyRate = createRateLimiter(deps.rateLimit || { windowMs: 10 * 60 * 1000, maxRequests: 12 });
 
@@ -267,12 +299,21 @@ function createAppServer(deps = {}) {
         return sendJson(res, 413, { error: 'Imaginea depășește limita de 4 MB.' });
       }
 
+      const tryLocal = async () => normalizeIdentifyResult(
+        await _localIdentify(rawBase64, mimeType),
+        'local_ocr',
+      );
+
       const byokKey = getHeaderString(req, 'x-gemini-key');
       const envKey = String(process.env.GEMINI_API_KEY || '').trim();
       const apiKey = byokKey || envKey;
 
       if (!apiKey) {
-        return sendJson(res, 400, { error: 'Lipsește cheia Gemini API (Setări AI sau GEMINI_API_KEY).' });
+        const local = await tryLocal();
+        if (local) return sendJson(res, 200, local);
+        return sendJson(res, 422, {
+          error: 'Nu am putut citi produsul din imagine. Scrie numele manual sau adaugă o cheie Gemini în Setări AI.',
+        });
       }
 
       if (!byokKey && envKey) {
@@ -286,48 +327,64 @@ function createAppServer(deps = {}) {
         contents: [{
           parts: [
             {
-              text: 'Identifică produsul exact din această imagine (brand, model, tip) pentru a-l căuta pe site-uri de shopping din România. Răspunde DOAR cu un JSON valid de forma {"query":"Nume Produs","category":"shoes|clothes|electronics|supplements|pharmacy_beauty|diy_home|books|general"} fără alt text.',
+              text: [
+                'Identifică produsul din imagine pentru compararea prețurilor în România.',
+                'Folosește DOAR ce se vede pe etichetă, ambalaj sau produs; nu ghici și nu inventa detalii.',
+                'Extrage brandul, modelul exact (inclusiv numărul/generația), culoarea, capacitatea și mărimea dacă sunt vizibile.',
+                'Câmpul "query" trebuie să aibă 3-8 cuvinte: brand + model + culoare (+ capacitate pentru electronice sau suplimente).',
+                'Nu include magazine, prețuri, nume de fișier, cuvinte promoționale sau text care nu descrie produsul.',
+                'Category trebuie să fie una dintre: shoes, clothes, electronics, supplements, pharmacy_beauty, diy_home, books, general.',
+                'Dacă nu poți citi sigur modelul, lasă "query" gol și pune "confidence" sub 0.5.',
+                'Răspunde DOAR cu JSON valid: {"query":"","category":"general","brand":"","model":"","color":"","size":"","confidence":0}.',
+              ].join('\n'),
             },
             { inline_data: { mime_type: mimeType, data: rawBase64 } },
           ],
         }],
       });
 
-      const geminiRes = await _safeFetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey,
-          },
-          body: geminiPayload,
-          timeoutMs: 12000,
-          maxBytes: 512000,
-          maxRedirects: 0,
-        }
-      );
-
-      if (!geminiRes.ok) {
-        return sendJson(res, 502, { error: 'Serviciul Gemini Vision a returnat o eroare.' });
+      let geminiRes;
+      try {
+        geminiRes = await _safeFetch(
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': apiKey,
+            },
+            body: geminiPayload,
+            timeoutMs: 12000,
+            maxBytes: 512000,
+            maxRedirects: 0,
+          }
+        );
+      } catch {
+        geminiRes = null;
       }
 
-      const parsed = geminiRes.json || JSON.parse(geminiRes.text || '{}');
-      const rawText = parsed?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      const cleaned = rawText.replace(/```json|```/gi, '').trim();
-      const result = JSON.parse(cleaned);
+      if (geminiRes?.ok) {
+        try {
+          const parsed = geminiRes.json || JSON.parse(geminiRes.text || '{}');
+          const parts = parsed?.candidates?.[0]?.content?.parts || [];
+          const rawText = parts.map((p) => p?.text || '').join('');
+          const cleaned = rawText.replace(/```json|```/gi, '').trim();
+          const result = JSON.parse(cleaned);
+          const normalized = normalizeIdentifyResult(result, 'gemini');
+          if (normalized) return sendJson(res, 200, normalized);
+        } catch { /* fall back to local OCR */ }
+      }
 
-      return sendJson(res, 200, {
-        query: String(result.query || '').trim(),
-        category: String(result.category || 'general').trim(),
-      });
+      const local = await tryLocal();
+      if (local) return sendJson(res, 200, local);
+      return sendJson(res, 502, { error: 'Serviciul Gemini Vision nu a identificat produsul. Confirmă numele mai jos.' });
     } catch (err) {
       const status = err?.statusCode || 500;
       return sendJson(res, status, { error: status >= 500 ? 'Nu am putut identifica produsul din imagine.' : err.message });
     }
   }
 
-  return http.createServer((req, res) => {
+  const handler = (req, res) => {
     const rawPathOnly = String(req.url || '/').split('?')[0];
     let decodedRawPath;
     try {
@@ -355,7 +412,11 @@ function createAppServer(deps = {}) {
 
     res.writeHead(405, { ...SECURITY_HEADERS, 'Content-Type': 'text/plain; charset=utf-8' });
     return res.end('Method Not Allowed');
-  });
+  };
+
+  const server = http.createServer(handler);
+  server.handler = handler;
+  return server;
 }
 
 if (require.main === module) {

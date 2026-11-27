@@ -56,6 +56,7 @@
   const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
 
   const storesCountBadge = document.getElementById('stores-count-badge');
+  const heroStoreCount = document.getElementById('hero-store-count');
 
   const formName = document.getElementById('form-name');
   const formLink = document.getElementById('form-link');
@@ -447,6 +448,7 @@
       const total = typeof data.total === 'number' ? data.total : stores.length;
 
       storesCountBadge.textContent = `${total} magazine RO`;
+      if (heroStoreCount) heroStoreCount.textContent = String(total);
       state.storesList = stores;
       state.storesById = new Map(stores.map((s) => [s.id, s]));
 
@@ -654,10 +656,10 @@
     };
   }
 
-  function isOfferLiveVerifyCapable(offer) {
-    if (typeof offer.liveVerifyCapable === 'boolean') return offer.liveVerifyCapable;
-    const storeMeta = state.storesById.get(offer.storeId);
-    return storeMeta?.ingestion?.liveVerifyCapable === true;
+  function isOfferLiveVerifyCapable() {
+    // The server attempts every store once and uses its circuit breaker to
+    // stop hammering genuinely blocked ones, so don't pre-skip any offer here.
+    return true;
   }
 
   async function handleSizeChange() {
@@ -678,7 +680,7 @@
 
     if (!isSizedCategory(effectiveCategory)) return;
 
-    // 2. Targeted live check ONLY for unverified_unknown offers whose store is liveVerifyCapable: true
+    // 2. Targeted live check for every still-unverified offer (server handles blocks)
     const urlsToVerify = state.rawOffers
       .filter((o) => o.stock?.verificationState === 'unverified_unknown' && isOfferLiveVerifyCapable(o))
       .map((o) => o.url)
@@ -1512,24 +1514,32 @@
     const apiKey = getStoredKey(GEMINI_KEY_STORAGE);
     photoAiStatus.textContent = apiKey
       ? '✨ Se identifică produsul cu Gemini Vision...'
-      : '✨ Se încearcă identificarea produsului...';
+      : '✨ Se citește textul vizibil din imagine (OCR local)...';
 
     try {
       const result = await identifyWithServerProxy(file, apiKey);
       if (result.query) {
         photoQueryInput.value = result.query;
-        photoAiStatus.textContent = `✨ Identificat automat: ${result.query}`;
+        const label = result.source === 'local_ocr' ? 'Identificat din imagine' : 'Identificat automat';
+        const confirmHint = result.needsConfirmation ? ' — confirmă mai jos' : '';
+        photoAiStatus.textContent = `✨ ${label}: ${result.query}${confirmHint}`;
       } else {
         photoAiStatus.textContent = 'Poți scrie sau confirma numele produsului mai jos.';
       }
       if (result.category && categorySelect.value === 'auto') {
         categorySelect.value = result.category;
-        updateSizeSelector(result.category, sizeSelect.value);
+        updateSizeSelector(result.category, String(result.size || '').replace(/^eu\s*/i, '').trim());
       }
-    } catch {
+      if (result.size && categorySelect.value !== 'auto') {
+        const detectedSize = String(result.size).replace(/^eu\s*/i, '').trim();
+        if ([...sizeSelect.options].some((opt) => opt.value === detectedSize)) {
+          sizeSelect.value = detectedSize;
+        }
+      }
+    } catch (err) {
       photoAiStatus.textContent = apiKey
         ? 'Nu am putut identifica automat produsul. Confirmă numele mai jos.'
-        : 'Poți confirma numele produsului mai jos (sau adaugă o cheie Gemini în Setări AI pentru detecție automată).';
+        : `Nu am putut citi produsul din imagine. ${err?.message || 'Scrie numele manual sau adaugă o cheie Gemini în Setări AI.'}`;
     }
   }
 

@@ -16,6 +16,7 @@ const {
   getPublicStoresSummary,
   resolveStore,
   runStoreAdapters,
+  buildAdapterSearchQuery,
   searchSerperShoppingRo,
   parseAltexFenrirResponse,
   parseMagento2GraphqlResponse,
@@ -90,6 +91,12 @@ test('data/stores.json schema integrity: 34+ RO stores, explicit verticals, real
   assert.equal(summary.total, stores.length);
   assert.equal(summary.stores.length, stores.length);
   assert.ok(summary.membershipPrograms.length >= 3);
+});
+
+test('buildAdapterSearchQuery maps TN and colors to Romanian storefront terms', () => {
+  assert.equal(buildAdapterSearchQuery('nike air max tn triple black'), 'nike air max plus tn negru');
+  assert.equal(buildAdapterSearchQuery('Nike Air Max TN White'), 'nike air max plus tn alb');
+  assert.equal(buildAdapterSearchQuery('nike air max plus negru'), 'nike air max plus negru');
 });
 
 test('resolveStore resolves domains, aliases, 3P marketplace strings, and unknown external RO sites', () => {
@@ -280,6 +287,30 @@ test('extractStockAndSizesFromHtml: JSON-LD variants, Magento spConfig, scoped D
   assert.equal(sNext.verificationState, 'verified_in_stock');
   assert.equal(sNext.hasDesiredSize, true);
   assert.deepEqual(sNext.availableSizes, ['42', '43']);
+});
+
+test('extractStockAndSizesFromHtml reads eMAG embedded size characteristics', () => {
+  // eMAG family/color pages expose every size in an embedded JS object whose
+  // inner characteristics array is strict JSON (unquoted keys only outside it).
+  const emagHtml = `<html><body><script>
+    EM.product = { id: 117097961, offer: { id: 329147473 }, name: "Air Max Plus",
+      "characteristics": [{"id":6506,"name":"Marime","products":[
+        {"label":"36","is_available":true,"may_be_ordered":true,"price":{"current":719}},
+        {"label":"37.5","is_available":true,"may_be_ordered":true,"price":{"current":719}},
+        {"label":"38","is_available":false,"may_be_ordered":false,"price":{"current":1189}}
+      ]}],
+      missing_characteristic_names: ["Marime"] };
+  </script></body></html>`;
+
+  const inStock = extractStockAndSizesFromHtml(emagHtml, 'https://www.emag.ro/p', 'shoes', '36');
+  assert.equal(inStock.verificationState, 'verified_in_stock');
+  assert.equal(inStock.hasDesiredSize, true);
+  assert.deepEqual(inStock.availableSizes, ['36', '37.5']);
+  assert.ok(inStock.label.includes('36'));
+
+  const outOfStock = extractStockAndSizesFromHtml(emagHtml, 'https://www.emag.ro/p', 'shoes', '38');
+  assert.equal(outOfStock.verificationState, 'verified_out_of_stock');
+  assert.equal(outOfStock.hasDesiredSize, false);
 });
 
 // --- 3. Platform Adapters & Serper Stage-1-only tests ---

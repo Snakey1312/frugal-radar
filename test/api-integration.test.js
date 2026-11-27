@@ -333,7 +333,7 @@ test('Real createAppServer /api/stores + runSearchPipeline Stage 1/2 + checkStoc
   // Manual stores must NOT bleed unrelated 'electronics' / 'diy_home' stores like dedeman
   assert.ok(!pipelineRes.manualStores.some((ms) => ms.storeId === 'dedeman'));
 
-  // checkStockBatch updates sizes truthfully for liveVerifyCapable stores and skips WAF-blocked stores
+  // checkStockBatch attempts every store once; blocked fetches stay honestly unverified
   const stockBatch = await checkStockBatch(
     {
       urls: [
@@ -345,12 +345,15 @@ test('Real createAppServer /api/stores + runSearchPipeline Stage 1/2 + checkStoc
     },
     {
       cache: testCache,
-      storeFetch: async (_sid, u) => ({
-        ok: true,
-        status: 200,
-        finalUrl: u,
-        text: '<div class="size-selector"><button data-size="41">41</button><button data-size="42">42</button><button data-size="43" disabled>43</button></div>',
-      }),
+      storeFetch: async (_sid, u) => {
+        if (/zalando/.test(u)) return { ok: false, status: 403, finalUrl: u, text: '' };
+        return {
+          ok: true,
+          status: 200,
+          finalUrl: u,
+          text: '<div class="size-selector"><button data-size="41">41</button><button data-size="42">42</button><button data-size="43" disabled>43</button></div>',
+        };
+      },
     }
   );
   assert.equal(stockBatch.results[0].stock.verificationState, 'verified_in_stock');

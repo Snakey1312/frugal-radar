@@ -4,14 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#081430">
+  <meta name="description" content="FrugalRadar compară ofertele magazinelor din România incluzând transportul, rambursul și stocul pe mărime. Vezi costul total real înainte de comandă.">
   <title>FrugalRadar — Comparator inteligent de prețuri în România</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <header class="site-header">
     <div class="container header-inner">
-      <a href="/" class="brand" aria-label="FrugalRadar Acasă">
-        <span class="brand-mark" aria-hidden="true">◎</span>
+      <a href="/" class="brand">
+        <span class="brand-mark" aria-hidden="true"><span class="brand-dot"></span></span>
         <span class="brand-text">
           <strong>FrugalRadar</strong>
           <small>Preț real + Transport + Stoc mărime</small>
@@ -28,11 +30,20 @@
 
   <main class="container main-content">
     <section class="hero-section" aria-labelledby="hero-title">
+      <div class="hero-rings" aria-hidden="true"></div>
+      <div class="hero-sweep" aria-hidden="true"></div>
+      <div class="hero-beacon" aria-hidden="true"></div>
       <div class="hero-copy">
+        <span class="hero-eyebrow">Radar de prețuri · România</span>
         <h1 id="hero-title">Plătești cel mai mic <span class="highlight">cost total real</span>, nu doar cel mai mic preț afișat.</h1>
         <p class="hero-subtitle">
           Încarcă un link, o poză sau numele produsului. Calculăm automat transportul (easybox / curier / ridicare), taxa de ramburs, abonamentele (Genius / ELITE / Gold) și verificăm dacă <strong>mărimea ta</strong> este în stoc pe site-urile românești.
         </p>
+        <div class="hero-metrics" aria-label="Ce verifică FrugalRadar">
+          <span><i aria-hidden="true">◎</i> <b id="hero-store-count">—</b> magazine scanate</span>
+          <span><i aria-hidden="true">◇</i> transport + ramburs incluse</span>
+          <span><i aria-hidden="true">◆</i> stoc pe mărimea ta</span>
+        </div>
       </div>
 
       <div class="search-card">

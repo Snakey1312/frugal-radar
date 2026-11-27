@@ -1,0 +1,9 @@
+node_modules
+.git
+*.log
+data/*.sqlite
+data/*.sqlite-*
+test/
+uploads/
+*.tmp
+.DS_Store

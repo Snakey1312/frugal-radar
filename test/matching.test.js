@@ -137,6 +137,35 @@ test('scoreCandidate enforces hard gates, RO/EN synonyms, ±5% tolerance, and un
   assert.ok(sneakerSyn.score >= 0.85);
 });
 
+test('scoreCandidate keeps specific sneaker families distinct and treats Air Max Plus as TN', () => {
+  const query = 'nike air max tn triple black';
+
+  const tnHit = scoreCandidate('Nike Air Max Plus TN 3 Triple Black', query, { category: 'shoes' });
+  assert.equal(tnHit.rejected, false);
+  assert.equal(tnHit.variantBucket, 'exact_variant');
+  assert.ok(tnHit.score >= 0.9);
+
+  const wrongColor = scoreCandidate(
+    'Nike Air Max Plus TN IF6224-101 White/University Red/Wolf Grey',
+    query,
+    { category: 'shoes' },
+  );
+  assert.equal(wrongColor.rejected, true);
+  assert.equal(wrongColor.rejectReason, 'color_mismatch');
+
+  for (const title of [
+    'Nike Air Max 97 Triple Black',
+    'Nike Air Max 270 Triple Black',
+    'Pantofi sport Nike Air Max 95 x Corteiz Honey Black',
+    'Nike Air Force 1 Low Negru Triple Black',
+    'Nike, Pantofi sport de piele Air Max, Negru, 9',
+  ]) {
+    const hit = scoreCandidate(title, query, { category: 'shoes' });
+    assert.equal(hit.rejected, true, `should reject ${title}`);
+    assert.equal(hit.score, 0);
+  }
+});
+
 test('canonicalizeUrl, extractStoreProductKey, buildClusterKey, and distillQuery work accurately', () => {
   const canon = canonicalizeUrl('https://WWW.eMAG.ro/telefon-apple/pd/D123ABC/?utm_source=google&fbclid=xyz&variant=black&id=99#reviews');
   assert.equal(canon, 'https://emag.ro/telefon-apple/pd/D123ABC?id=99&variant=black');
