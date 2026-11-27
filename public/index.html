@@ -18,7 +18,7 @@
         </span>
       </a>
       <div class="header-actions">
-        <span class="pill-badge" id="stores-count-badge">15 magazine RO</span>
+        <span class="pill-badge" id="stores-count-badge">Magazine RO</span>
         <button type="button" class="btn-ghost" id="open-settings-btn" aria-haspopup="dialog">
           <span aria-hidden="true">⚙</span> Setări AI
         </button>
@@ -31,7 +31,7 @@
       <div class="hero-copy">
         <h1 id="hero-title">Plătești cel mai mic <span class="highlight">cost total real</span>, nu doar cel mai mic preț afișat.</h1>
         <p class="hero-subtitle">
-          Încarcă un link, o poză sau numele produsului. Calculăm automat transportul (easybox / curier), taxa de ramburs, abonamentul Genius și verificăm dacă <strong>mărimea ta</strong> este în stoc pe site-urile românești.
+          Încarcă un link, o poză sau numele produsului. Calculăm automat transportul (easybox / curier / ridicare), taxa de ramburs, abonamentele (Genius / ELITE / Gold) și verificăm dacă <strong>mărimea ta</strong> este în stoc pe site-urile românești.
         </p>
       </div>
 
@@ -55,7 +55,7 @@
               <form id="form-name" class="search-form" novalidate>
                 <div class="field">
                   <label for="product-name-input">Ce produs cauți?</label>
-                  <span id="name-hint" class="hint">Exemplu: Nike Air Force 1 '07, Geacă The North Face Nuptse, iPhone 15 128GB</span>
+                  <span id="name-hint" class="hint">Exemplu: Nike Air Force 1 '07, Geacă The North Face Nuptse, iPhone 15 128GB, Whey Protein 2kg</span>
                   <div class="input-row">
                     <input
                       type="text"
@@ -80,7 +80,7 @@
                 <button type="button" class="chip-btn" data-example="Nike Air Force 1 '07" data-cat="shoes" data-size="42">👟 Nike Air Force 1 (42)</button>
                 <button type="button" class="chip-btn" data-example="Geacă The North Face Nuptse" data-cat="clothes" data-size="L">🧥 Geacă North Face (L)</button>
                 <button type="button" class="chip-btn" data-example="Apple iPhone 15 128GB" data-cat="electronics">📱 iPhone 15 128GB</button>
-                <button type="button" class="chip-btn" data-example="Asics Gel-Kayano 30" data-cat="shoes" data-size="43">🏃 Asics Gel-Kayano 30 (43)</button>
+                <button type="button" class="chip-btn" data-example="Optimum Nutrition Gold Standard Whey 2.27kg" data-cat="supplements">💪 Whey Protein 2.27kg</button>
               </div>
             </div>
           </div>
@@ -91,7 +91,7 @@
               <form id="form-link" class="search-form" novalidate>
                 <div class="field">
                   <label for="product-url-input">Lipește link-ul produsului</label>
-                  <span id="url-hint" class="hint">Suportă eMAG, Fashion Days, Answear, epantofi, About You, Altex, Decathlon etc.</span>
+                  <span id="url-hint" class="hint">Suportă eMAG, Altex, Fashion Days, Answear, epantofi, GymBeam, Notino, Dr.Max etc.</span>
                   <div class="input-row">
                     <input
                       type="url"
@@ -109,7 +109,30 @@
                   </div>
                 </div>
               </form>
+
               <div id="url-preview-box" class="extracted-preview" hidden></div>
+
+              <form id="form-link-confirm" class="link-confirm-form" hidden novalidate>
+                <div class="field">
+                  <label for="link-query-input">Nume produs extras / confirmat pentru căutare</label>
+                  <span id="link-confirm-hint" class="hint">Poți ajusta termenul extras înainte să re-compari ofertele față de link-ul sursă.</span>
+                  <div class="input-row">
+                    <input
+                      type="text"
+                      id="link-query-input"
+                      required
+                      minlength="2"
+                      placeholder="Ex: Sony WH-1000XM5 Negru"
+                      aria-describedby="link-confirm-hint"
+                      data-error="link-confirm-error"
+                    >
+                    <button type="submit" class="btn-primary" id="link-reconfirm-btn">Caută cu acest nume</button>
+                  </div>
+                  <div id="link-confirm-error" class="error-msg">
+                    <span role="img" aria-label="Eroare">⚠</span> Introdu minim 2 caractere pentru căutare.
+                  </div>
+                </div>
+              </form>
             </div>
           </div>
 
@@ -174,7 +197,10 @@
               <option value="clothes">Haine</option>
               <option value="electronics">Electronice / IT</option>
               <option value="supplements">Suplimente / Sport</option>
-              <option value="general">General / Casă</option>
+              <option value="pharmacy_beauty">Farmacie &amp; Beauty</option>
+              <option value="diy_home">Casă &amp; Bricolaj</option>
+              <option value="books">Cărți</option>
+              <option value="general">General</option>
             </select>
           </div>
 
@@ -190,6 +216,7 @@
             <select id="delivery-select">
               <option value="easybox">Easybox / Locker</option>
               <option value="courier">Curier la ușă</option>
+              <option value="clickAndCollect">Ridicare magazin</option>
             </select>
           </div>
 
@@ -201,18 +228,34 @@
             </select>
           </div>
 
-          <div class="option-group">
-            <label for="voucher-input">Voucher (%)</label>
-            <input type="number" id="voucher-input" min="0" max="50" step="1" value="0">
+          <div class="option-group voucher-group">
+            <label for="voucher-input">Voucher (% / Magazin)</label>
+            <div class="voucher-inputs">
+              <input type="number" id="voucher-input" min="0" max="50" step="1" value="0" aria-label="Procent voucher">
+              <select id="voucher-store-select" aria-label="Magazin pentru voucher">
+                <option value="all">Toate magazinele</option>
+              </select>
+            </div>
           </div>
 
-          <div class="option-checks">
-            <label class="checkbox-label">
-              <input type="checkbox" id="genius-emag"> eMAG Genius
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" id="genius-fashion"> Fashion Days Genius
-            </label>
+          <div class="option-group membership-dropdown" id="membership-dropdown">
+            <span class="option-label-static">Abonamente</span>
+            <button
+              type="button"
+              class="btn-ghost membership-trigger"
+              id="memberships-btn"
+              aria-expanded="false"
+              aria-controls="memberships-popover"
+            >
+              Abonamente (0) ▾
+            </button>
+            <div
+              id="memberships-popover"
+              class="membership-popover"
+              role="region"
+              aria-label="Configurare abonamente"
+              hidden
+            ></div>
           </div>
         </div>
       </div>
@@ -220,6 +263,7 @@
 
     <!-- Results Section -->
     <section id="results-section" class="results-section" hidden aria-live="polite">
+      <div id="source-comparison-banner" class="source-banner" hidden></div>
       <div id="winner-card" class="winner-card"></div>
 
       <div class="results-toolbar">
@@ -228,6 +272,10 @@
           <p id="results-subhead" class="muted"></p>
         </div>
         <div class="results-filters">
+          <div class="cache-bar" id="cache-bar" hidden>
+            <span id="cache-freshness-text" class="cache-freshness"></span>
+            <button type="button" class="btn-ghost btn-sm" id="refresh-live-btn">↻ Actualizează live</button>
+          </div>
           <label class="checkbox-label" id="only-in-stock-wrap">
             <input type="checkbox" id="only-in-stock-toggle" checked>
             Doar cu mărimea mea în stoc
@@ -254,13 +302,34 @@
           <tbody id="results-tbody"></tbody>
         </table>
       </div>
+
+      <details id="other-variants-details" class="variants-details" hidden>
+        <summary id="other-variants-summary" class="variants-summary">Alte variante</summary>
+        <div class="variants-table-wrap">
+          <table id="other-variants-table">
+            <thead>
+              <tr>
+                <th scope="col">Magazin &amp; Variantă</th>
+                <th scope="col">Preț / Unitate</th>
+                <th scope="col">Cost Total Real</th>
+                <th scope="col">Stoc</th>
+                <th scope="col">Acțiune</th>
+              </tr>
+            </thead>
+            <tbody id="other-variants-tbody"></tbody>
+          </table>
+        </div>
+      </details>
+
+      <div id="manual-stores-box" class="manual-stores-box" hidden></div>
+      <div id="store-health-strip" class="health-strip" hidden></div>
     </section>
   </main>
 
   <footer class="site-footer">
     <div class="container footer-inner">
       <p>FrugalRadar — Calculator de cost total real (Preț + Transport + Ramburs + Stoc Mărime) pentru magazinele din România.</p>
-      <p class="muted">Prețurile și disponibilitatea mărimilor sunt estimate/extrase inteligent; verifică întotdeauna pagina magazinului înainte de comandă.</p>
+      <p class="muted">Prețurile și disponibilitatea mărimilor sunt verificate transparent; verifică întotdeauna coșul de pe site-ul magazinului înainte de comandă.</p>
     </div>
   </footer>
 
@@ -272,16 +341,20 @@
         <button type="submit" class="btn-ghost btn-sm" aria-label="Închide">✕</button>
       </div>
       <p class="muted">
-        Fără chei API, aplicația caută automat pe site-urile care permit acces direct (eMAG, Altex, GymBeam, Fashion Days, Zalando). Pentru a căuta simultan pe <strong>TOATE site-urile din România</strong> prin Google Shopping (Trendyol, Dr.Max, Notino, epantofi, Answear etc.), poți adăuga o cheie gratuită <strong>Serper.dev</strong> (2.500 căutări gratuite).
+        Fără chei API, aplicația caută automat pe magazinele românești suportate direct. Pentru căutare extinsă prin Google Shopping RO, poți adăuga o cheie <strong>Serper.dev</strong>, iar pentru recunoaștere din poză poți folosi o cheie <strong>Gemini</strong> (procesată securizat prin serverul local).
       </p>
       <div class="field">
         <label for="serper-key-input">Serper.dev API Key (Google Shopping România)</label>
-        <input type="password" id="serper-key-input" placeholder="Cheie de pe serper.dev...">
+        <input type="password" id="serper-key-input" placeholder="Cheie de pe serper.dev..." autocomplete="off">
       </div>
       <div class="field">
         <label for="gemini-key-input">Gemini API Key (Recunoaștere produs din poză)</label>
-        <input type="password" id="gemini-key-input" placeholder="AIza...">
+        <input type="password" id="gemini-key-input" placeholder="AIza..." autocomplete="off">
       </div>
+      <label class="checkbox-label remember-keys-label">
+        <input type="checkbox" id="remember-keys-check">
+        Ține minte cheile pe acest dispozitiv (altfel se șterg la închiderea tab-ului)
+      </label>
       <div class="modal-actions">
         <button type="button" class="btn-ghost" id="clear-key-btn">Șterge cheile</button>
         <button type="button" class="btn-primary" id="save-key-btn">Salvează</button>
@@ -289,6 +362,7 @@
     </form>
   </dialog>
 
+  <script src="/cost-calculator.js" defer></script>
   <script src="/app.js" defer></script>
 </body>
 </html>
