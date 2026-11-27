@@ -24,6 +24,8 @@ const {
   parseVtexSearchResponse,
   parseEmagHtml,
   parseCheerioCatalogHtml,
+  parseBingShoppingHtml,
+  decodeBingClickTarget,
 } = require('../lib/adapters');
 
 const { parseRoPrice } = require('../lib/matching');
@@ -97,6 +99,33 @@ test('buildAdapterSearchQuery maps TN and colors to Romanian storefront terms', 
   assert.equal(buildAdapterSearchQuery('nike air max tn triple black'), 'nike air max plus tn negru');
   assert.equal(buildAdapterSearchQuery('Nike Air Max TN White'), 'nike air max plus tn alb');
   assert.equal(buildAdapterSearchQuery('nike air max plus negru'), 'nike air max plus negru');
+});
+
+test('Bing Shopping parser unwraps click targets and reads keyless merchant offers', () => {
+  const target = 'https://www.footshop.ro/ro/incalaminte-i-sneakeri-pentru-barbai/nike.html?size=41';
+  const affiliate = `https://ro.expandeo.com/ex/bing-css?url=${encodeURIComponent(target)}`;
+  const encoded = Buffer.from(encodeURIComponent(affiliate)).toString('base64url');
+  const href = `https://www.bing.com/aclick?u=${encoded}`;
+
+  assert.equal(decodeBingClickTarget(href), target);
+
+  const html = `<div class="br-gOffCard">
+    <a class="br-offLink" href="${href}">
+      <div class="br-offInfo">
+        <div class="br-offTtl"><span title="Nike Air Max Plus TN VII Black/ Black-Anthracite">Nike Air Max Plus TN VII Black…</span></div>
+        <div class="br-offPrice"><div class="br-price">950,00 lei</div></div>
+        <div class="br-offSlr"><span class="br-offSlrTxt">Footshop.ro</span></div>
+      </div>
+    </a>
+  </div>`;
+
+  const matches = parseBingShoppingHtml(html);
+  assert.equal(matches.length, 1);
+  assert.equal(matches[0].title, 'Nike Air Max Plus TN VII Black/ Black-Anthracite');
+  assert.equal(matches[0].price, 950);
+  assert.equal(matches[0].customStoreName, 'Footshop.ro');
+  assert.equal(matches[0].priceSource, 'tier3_bing');
+  assert.equal(matches[0].url, target);
 });
 
 test('resolveStore resolves domains, aliases, 3P marketplace strings, and unknown external RO sites', () => {

@@ -309,6 +309,12 @@ test('Real createAppServer /api/stores + runSearchPipeline Stage 1/2 + checkStoc
           },
         ],
       }),
+      searchBingShoppingRo: async () => ({
+        cacheStatus: 'miss',
+        cachedAt: Date.now(),
+        info: { used: true, offerCount: 0, error: null },
+        matches: [],
+      }),
       storeFetch: async (_storeId, rawUrl) => {
         if (rawUrl.includes('protein4life.ro')) {
           return {

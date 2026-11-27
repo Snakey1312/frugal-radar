@@ -159,6 +159,7 @@ test('scoreCandidate keeps specific sneaker families distinct and treats Air Max
     'Pantofi sport Nike Air Max 95 x Corteiz Honey Black',
     'Nike Air Force 1 Low Negru Triple Black',
     'Nike, Pantofi sport de piele Air Max, Negru, 9',
+    'Nike Air Liquid Max Black/ Black-Clear',
   ]) {
     const hit = scoreCandidate(title, query, { category: 'shoes' });
     assert.equal(hit.rejected, true, `should reject ${title}`);
