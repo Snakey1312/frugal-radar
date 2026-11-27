@@ -42,7 +42,7 @@ module.exports = async function diag(req, res) {
         prices: (html.match(/br-price/g) || []).length,
         parsed: matches.length,
         title: title.replace(/\s+/g, ' ').trim().slice(0, 100),
-        sample: matches.slice(0, 2).map((m) => `${m.title} | ${m.price} | ${m.customStoreName}`),
+        sample: matches.slice(0, 3).map((m) => `${m.title} | ${m.priceLabel} -> ${m.price} | ${m.customStoreName}`),
       });
     } catch (e) {
       out.push({ name, error: e.message });

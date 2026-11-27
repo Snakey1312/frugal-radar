@@ -117,12 +117,18 @@ test('Bing Shopping parser unwraps click targets and reads keyless merchant offe
         <div class="br-offSlr"><span class="br-offSlrTxt">Footshop.ro</span></div>
       </div>
     </a>
+    <a class="br-offLink" href="${href}">
+      <div class="br-offTtl"><span title="Nike Air Max Plus TN VII Black/ Black-Anthracite 12.5">Nike Air Max Plus TN VII Black 12.5</span></div>
+      <div class="br-price">68.389 Ft</div>
+      <span class="br-offSlrTxt">Footshop.hu</span>
+    </a>
   </div>`;
 
   const matches = parseBingShoppingHtml(html);
   assert.equal(matches.length, 1);
   assert.equal(matches[0].title, 'Nike Air Max Plus TN VII Black/ Black-Anthracite');
   assert.equal(matches[0].price, 950);
+  assert.equal(matches[0].priceLabel, '950,00 lei');
   assert.equal(matches[0].customStoreName, 'Footshop.ro');
   assert.equal(matches[0].priceSource, 'tier3_bing');
   assert.equal(matches[0].url, target);
