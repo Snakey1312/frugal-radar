@@ -1,0 +1,1363 @@
+{
+  "version": 2,
+  "membershipPrograms": [
+    {
+      "id": "emag_genius",
+      "name": "eMAG Genius",
+      "type": "radio",
+      "tiers": [
+        { "id": "none", "label": "Fără Genius" },
+        { "id": "light", "label": "Genius Light (locker >= 30 lei)" },
+        { "id": "premium", "label": "Genius Premium / Family (curier >= 100 lei)" }
+      ],
+      "stores": ["emag", "fashiondays", "flip"]
+    },
+    {
+      "id": "farmacia_tei_elite",
+      "name": "Tei / Bebe Tei ELITE",
+      "type": "boolean",
+      "label": "Card ELITE (locker gratuit >= 150 lei)",
+      "stores": ["farmaciatei", "bebetei"]
+    },
+    {
+      "id": "sephora_gold",
+      "name": "Sephora Gold",
+      "type": "boolean",
+      "label": "Sephora Gold (livrare gratuită fără prag)",
+      "stores": ["sephora"]
+    }
+  ],
+  "stores": [
+    {
+      "id": "emag",
+      "name": "eMAG",
+      "aliases": ["emag.ro", "emag marketplace", "dante international"],
+      "domains": ["emag.ro"],
+      "platform": "custom",
+      "businessModel": "marketplace_hybrid",
+      "vertical": "general_marketplace",
+      "categories": ["electronics", "shoes", "clothes", "supplements", "pharmacy_beauty", "diy_home", "books"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.99, "freeThreshold": 200, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 19.99, "freeThreshold": 200, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Showroom eMAG" }
+        },
+        "bulkyPolicy": "surcharge_or_excluded",
+        "deliveryDays": { "min": 1, "max": 2, "label": "1-2 zile" },
+        "membershipProgram": {
+          "programId": "emag_genius",
+          "lockerFreeThreshold": 30,
+          "courierFreeThreshold": 100,
+          "requiresTier": "light",
+          "appliesTo3P": "only_if_offer_badged"
+        }
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 5.0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 30, "freeReturn": true, "freeReturnMinOrderRon": null, "notes": "Retur gratuit 30 zile easybox/curier (60 zile cu Genius)" },
+      "ingestion": {
+        "tier": 3,
+        "adapterType": "emag_html",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "cloudflare",
+        "searchUrlTemplate": "https://www.emag.ro/search/{query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "altex",
+      "name": "Altex",
+      "aliases": ["altex.ro", "media galaxy", "mediagalaxy.ro"],
+      "domains": ["altex.ro", "mediagalaxy.ro"],
+      "platform": "custom",
+      "businessModel": "marketplace_hybrid",
+      "vertical": "electronics",
+      "categories": ["electronics", "diy_home"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 9.9, "freeThreshold": 400, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "Locker Altex / easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 14.9, "freeThreshold": 400, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Rezervă în magazin Altex" }
+        },
+        "bulkyPolicy": "surcharge_or_excluded",
+        "deliveryDays": { "min": 1, "max": 2, "label": "1-2 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": 75, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 14, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "14 zile retur în magazin sau prin curier (cost retur client)" },
+      "ingestion": {
+        "tier": 2,
+        "adapterType": "altex_fenrir",
+        "liveVerifyCapable": true,
+        "antiBotLevel": "low",
+        "searchUrlTemplate": "https://altex.ro/cauta/?q={query}",
+        "scraperConfig": {
+          "apiUrl": "https://fenrir.altex.ro/v2/catalog/search/{query}?size=10",
+          "baseUrl": "https://altex.ro"
+        }
+      }
+    },
+    {
+      "id": "pcgarage",
+      "name": "PC Garage",
+      "aliases": ["pcgarage.ro", "pc garage"],
+      "domains": ["pcgarage.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "electronics",
+      "categories": ["electronics"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.99, "freeThreshold": 500, "requiresOnlinePay": true, "maxWeightKg": 7, "label": "easybox (plată online)" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 19.99, "freeThreshold": 500, "requiresOnlinePay": false, "maxWeightKg": 7 },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Sediu PC Garage București" }
+        },
+        "bulkyPolicy": "surcharge_or_excluded",
+        "deliveryDays": { "min": 1, "max": 2, "label": "1-2 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 12.0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": 7, "disablesFreeShipping": true, "disabledOnChannels": ["easybox"] }
+      },
+      "returns": { "days": 14, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "14 zile retur; transport gratuit >=500 lei doar <=7kg și plată online cu cardul" },
+      "ingestion": {
+        "tier": 2,
+        "adapterType": "cheerio_catalog",
+        "liveVerifyCapable": true,
+        "antiBotLevel": "low",
+        "searchUrlTemplate": "https://www.pcgarage.ro/cauta/{query}",
+        "scraperConfig": {
+          "baseUrl": "https://www.pcgarage.ro",
+          "cardSelector": ".product_box",
+          "titleSelector": ".product_box_name a",
+          "linkSelector": ".product_box_name a",
+          "priceSelector": ".pb_price, .price_num",
+          "stockOosRegex": "stoc\\s+epuizat|indisponibil"
+        }
+      }
+    },
+    {
+      "id": "flanco",
+      "name": "Flanco",
+      "aliases": ["flanco.ro"],
+      "domains": ["flanco.ro"],
+      "platform": "magento2",
+      "businessModel": "1p",
+      "vertical": "electronics",
+      "categories": ["electronics"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 12.9, "freeThreshold": 250, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 19.9, "freeThreshold": 250, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Ridicare din magazin Flanco" }
+        },
+        "bulkyPolicy": "surcharge_or_excluded",
+        "deliveryDays": { "min": 1, "max": 3, "label": "1-3 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 4.9, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 14, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "14 zile retur; ridicare gratuită din magazinele Flanco" },
+      "ingestion": {
+        "tier": 2,
+        "adapterType": "cheerio_catalog",
+        "liveVerifyCapable": true,
+        "antiBotLevel": "low",
+        "searchUrlTemplate": "https://www.flanco.ro/catalogsearch/result/?q={query}",
+        "scraperConfig": {
+          "baseUrl": "https://www.flanco.ro",
+          "cardSelector": ".product-item",
+          "titleSelector": ".product-item-link",
+          "linkSelector": ".product-item-link",
+          "priceSelector": ".price-final_price .price, [data-price-type='finalPrice'] .price",
+          "stockOosRegex": "stoc\\s+epuizat|out\\s+of\\s+stock"
+        }
+      }
+    },
+    {
+      "id": "vexio",
+      "name": "Vexio",
+      "aliases": ["vexio.ro"],
+      "domains": ["vexio.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "electronics",
+      "categories": ["electronics"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.9, "freeThreshold": 500, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox / locker" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 18.9, "freeThreshold": 500, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": false, "fee": null, "freeThreshold": null }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 2, "max": 3, "label": "2-3 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 6.0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 14, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "14 zile retur standard" },
+      "ingestion": {
+        "tier": 2,
+        "adapterType": "cheerio_catalog",
+        "liveVerifyCapable": true,
+        "antiBotLevel": "low",
+        "searchUrlTemplate": "https://www.vexio.ro/cautare/?q={query}",
+        "scraperConfig": {
+          "baseUrl": "https://www.vexio.ro",
+          "cardSelector": ".product-box, .product-item, .product-card",
+          "titleSelector": ".product-name a, .name a, h2 a",
+          "linkSelector": ".product-name a, .name a, h2 a",
+          "priceSelector": ".price-new, .product-price, .price",
+          "stockOosRegex": "stoc\\s+epuizat|indisponibil"
+        }
+      }
+    },
+    {
+      "id": "evomag",
+      "name": "evoMAG",
+      "aliases": ["evomag.ro"],
+      "domains": ["evomag.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "electronics",
+      "categories": ["electronics"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 11.99, "freeThreshold": 1499, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 19.99, "freeThreshold": 1499, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Showroom evoMAG" }
+        },
+        "bulkyPolicy": "surcharge_or_excluded",
+        "deliveryDays": { "min": 1, "max": 3, "label": "1-3 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 5.99, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 14, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "14 zile retur; transport gratuit peste 1499 lei" },
+      "ingestion": {
+        "tier": 2,
+        "adapterType": "cheerio_catalog",
+        "liveVerifyCapable": true,
+        "antiBotLevel": "low",
+        "searchUrlTemplate": "https://www.evomag.ro/frontend/product/search?search={query}",
+        "scraperConfig": {
+          "baseUrl": "https://www.evomag.ro",
+          "cardSelector": ".nice_product_container, .product_grid_item",
+          "titleSelector": ".npi_name a",
+          "linkSelector": ".npi_name a",
+          "priceSelector": ".real_price",
+          "stockOosRegex": "stoc\\s+epuizat|indisponibil"
+        }
+      }
+    },
+    {
+      "id": "forit",
+      "name": "ForIT",
+      "aliases": ["forit.ro"],
+      "domains": ["forit.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "electronics",
+      "categories": ["electronics"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 16.99, "freeThreshold": 300, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 21.99, "freeThreshold": 300, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Punct ridicare ForIT" }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 1, "max": 3, "label": "1-3 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 5.0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 14, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "14 zile retur; transport gratuit >=300 lei" },
+      "ingestion": {
+        "tier": 2,
+        "adapterType": "cheerio_catalog",
+        "liveVerifyCapable": true,
+        "antiBotLevel": "low",
+        "searchUrlTemplate": "https://www.forit.ro/cauta/?q={query}",
+        "scraperConfig": {
+          "baseUrl": "https://www.forit.ro",
+          "cardSelector": ".product-box, .product-card, .product",
+          "titleSelector": ".product-title a, .name a, h2 a",
+          "linkSelector": ".product-title a, .name a, h2 a",
+          "priceSelector": ".product-price, .price-new, .price",
+          "stockOosRegex": "stoc\\s+epuizat|indisponibil"
+        }
+      }
+    },
+    {
+      "id": "cel",
+      "name": "CEL.ro",
+      "aliases": ["cel.ro"],
+      "domains": ["cel.ro"],
+      "platform": "custom",
+      "businessModel": "marketplace_hybrid",
+      "vertical": "electronics",
+      "categories": ["electronics"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.9, "freeThreshold": 299, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 19.9, "freeThreshold": 299, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Punct ridicare București" }
+        },
+        "bulkyPolicy": "surcharge_or_excluded",
+        "deliveryDays": { "min": 1, "max": 3, "label": "1-3 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 5.0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 14, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "14 zile retur; verifică vânzătorul în marketplace" },
+      "ingestion": {
+        "tier": 2,
+        "adapterType": "cheerio_catalog",
+        "liveVerifyCapable": true,
+        "antiBotLevel": "low",
+        "searchUrlTemplate": "https://www.cel.ro/cauta/{query}/",
+        "scraperConfig": {
+          "baseUrl": "https://www.cel.ro",
+          "cardSelector": ".product_data",
+          "titleSelector": ".productTitle a, h2.productTitle a",
+          "linkSelector": ".productTitle a, h2.productTitle a",
+          "priceSelector": ".pret_n, [itemprop='price']",
+          "stockOosRegex": "stoc\\s+epuizat|indisponibil"
+        }
+      }
+    },
+    {
+      "id": "flip",
+      "name": "Flip.ro",
+      "aliases": ["flip.ro"],
+      "domains": ["flip.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "electronics",
+      "categories": ["electronics"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.99, "freeThreshold": 500, "requiresOnlinePay": false, "maxWeightKg": 10, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 19.99, "freeThreshold": 500, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": false, "fee": null, "freeThreshold": null }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 1, "max": 2, "label": "1-2 zile" },
+        "membershipProgram": {
+          "programId": "emag_genius",
+          "lockerFreeThreshold": 500,
+          "courierFreeThreshold": 500,
+          "requiresTier": "light",
+          "appliesTo3P": "never"
+        }
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 30, "freeReturn": true, "freeReturnMinOrderRon": null, "notes": "Produse recondiționate, 24 luni garanție, 30 zile retur gratuit" },
+      "ingestion": {
+        "tier": 3,
+        "adapterType": "serper_only",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "cloudflare",
+        "searchUrlTemplate": "https://flip.ro/cauta/?q={query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "fashiondays",
+      "name": "Fashion Days",
+      "aliases": ["fashiondays.ro", "fashion days"],
+      "domains": ["fashiondays.ro"],
+      "platform": "custom",
+      "businessModel": "marketplace_hybrid",
+      "vertical": "fashion",
+      "categories": ["shoes", "clothes"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 11.99, "freeThreshold": 250, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 16.99, "freeThreshold": 250, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": false, "fee": null, "freeThreshold": null }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 1, "max": 3, "label": "1-3 zile" },
+        "membershipProgram": {
+          "programId": "emag_genius",
+          "lockerFreeThreshold": 30,
+          "courierFreeThreshold": 100,
+          "requiresTier": "light",
+          "appliesTo3P": "only_if_offer_badged"
+        }
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 5.0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 30, "freeReturn": true, "freeReturnMinOrderRon": null, "notes": "30 zile retur gratuit easybox/curier pentru produse vândute de Fashion Days" },
+      "ingestion": {
+        "tier": 3,
+        "adapterType": "serper_only",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "cloudflare",
+        "searchUrlTemplate": "https://www.fashiondays.ro/search/?q={query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "zalando",
+      "name": "Zalando.ro",
+      "aliases": ["zalando.ro", "zalando"],
+      "domains": ["zalando.ro"],
+      "platform": "custom",
+      "businessModel": "marketplace_hybrid",
+      "vertical": "fashion",
+      "categories": ["shoes", "clothes"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.9, "freeThreshold": 130, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox / FANbox" },
+          "fanbox": { "available": true, "fee": 14.9, "freeThreshold": 130, "requiresOnlinePay": false, "maxWeightKg": 20 },
+          "courier": { "available": true, "fee": 19.9, "freeThreshold": 130, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": false, "fee": null, "freeThreshold": null }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 3, "max": 6, "label": "3-6 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 100, "freeReturn": true, "freeReturnMinOrderRon": null, "notes": "100 zile retur gratuit" },
+      "ingestion": {
+        "tier": 3,
+        "adapterType": "serper_only",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "akamai",
+        "searchUrlTemplate": "https://www.zalando.ro/catalog/?q={query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "aboutyou",
+      "name": "ABOUT YOU",
+      "aliases": ["aboutyou.ro", "about you"],
+      "domains": ["aboutyou.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "fashion",
+      "categories": ["shoes", "clothes"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 9.9, "freeThreshold": 99, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "Locker / FANbox" },
+          "fanbox": { "available": true, "fee": 9.9, "freeThreshold": 99, "requiresOnlinePay": false, "maxWeightKg": 20 },
+          "courier": { "available": true, "fee": 9.9, "freeThreshold": 99, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": false, "fee": null, "freeThreshold": null }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 3, "max": 5, "label": "3-5 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 100, "freeReturn": true, "freeReturnMinOrderRon": null, "notes": "Livrare gratuită peste 99 lei; 100 zile retur gratuit" },
+      "ingestion": {
+        "tier": 3,
+        "adapterType": "serper_only",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "cloudflare",
+        "searchUrlTemplate": "https://www.aboutyou.ro/cautare?term={query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "epantofi",
+      "name": "epantofi.ro",
+      "aliases": ["epantofi.ro", "epantofi", "modivo", "modivo.ro"],
+      "domains": ["epantofi.ro", "modivo.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "fashion",
+      "categories": ["shoes", "clothes"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.0, "freeThreshold": 199, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox / FANbox" },
+          "fanbox": { "available": true, "fee": 14.0, "freeThreshold": 199, "requiresOnlinePay": false, "maxWeightKg": 20 },
+          "courier": { "available": true, "fee": 19.0, "freeThreshold": 199, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": false, "fee": null, "freeThreshold": null }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 2, "max": 4, "label": "2-4 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 30, "freeReturn": true, "freeReturnMinOrderRon": null, "notes": "30 zile retur gratuit (inclusiv MODIVO)" },
+      "ingestion": {
+        "tier": 3,
+        "adapterType": "serper_only",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "cloudflare",
+        "searchUrlTemplate": "https://www.epantofi.ro/cautare?q={query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "answear",
+      "name": "Answear.ro",
+      "aliases": ["answear.ro", "answear"],
+      "domains": ["answear.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "fashion",
+      "categories": ["shoes", "clothes"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.9, "freeThreshold": 330, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox / FANbox" },
+          "fanbox": { "available": true, "fee": 14.9, "freeThreshold": 330, "requiresOnlinePay": false, "maxWeightKg": 20 },
+          "courier": { "available": true, "fee": 19.9, "freeThreshold": 330, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": false, "fee": null, "freeThreshold": null }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 2, "max": 4, "label": "2-4 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 4.9, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 30, "freeReturn": true, "freeReturnMinOrderRon": 330, "notes": "Livrare și primul retur gratuite pentru comenzi >= 330 lei" },
+      "ingestion": {
+        "tier": 3,
+        "adapterType": "serper_only",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "cloudflare",
+        "searchUrlTemplate": "https://answear.ro/k/{query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "trendyol",
+      "name": "Trendyol.ro",
+      "aliases": ["trendyol.ro", "trendyol.com/ro", "trendyol"],
+      "domains": ["trendyol.com"],
+      "platform": "custom",
+      "businessModel": "marketplace_pure",
+      "vertical": "fashion",
+      "categories": ["shoes", "clothes"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 9.99, "freeThreshold": 150, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox / FANbox" },
+          "fanbox": { "available": true, "fee": 9.99, "freeThreshold": 150, "requiresOnlinePay": false, "maxWeightKg": 20 },
+          "courier": { "available": true, "fee": 14.99, "freeThreshold": 150, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": false, "fee": null, "freeThreshold": null }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 3, "max": 6, "label": "3-6 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 19.99, "nonRefundableOnReturn": true, "maxOrderRon": 2500, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 30, "freeReturn": true, "freeReturnMinOrderRon": null, "notes": "Atenție: taxa de ramburs (19,99 lei) NU se rambursează la retur" },
+      "ingestion": {
+        "tier": 3,
+        "adapterType": "serper_only",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "cloudflare",
+        "searchUrlTemplate": "https://www.trendyol.com/ro/sr?q={query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "sportisimo",
+      "name": "Sportisimo",
+      "aliases": ["sportisimo.ro", "sportisimo"],
+      "domains": ["sportisimo.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "fashion",
+      "categories": ["shoes", "clothes"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.9, "freeThreshold": 250, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox / punct ridicare" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 19.9, "freeThreshold": 250, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Rezervă în magazin Sportisimo" }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 2, "max": 4, "label": "2-4 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 30, "freeReturn": true, "freeReturnMinOrderRon": null, "notes": "30 zile retur gratuit în magazinele Sportisimo" },
+      "ingestion": {
+        "tier": 2,
+        "adapterType": "cheerio_catalog",
+        "liveVerifyCapable": true,
+        "antiBotLevel": "low",
+        "searchUrlTemplate": "https://www.sportisimo.ro/cauta/?q={query}",
+        "scraperConfig": {
+          "baseUrl": "https://www.sportisimo.ro",
+          "cardSelector": ".product-box, .product-item, .product_item",
+          "titleSelector": ".product-name a, .name a, h2 a",
+          "linkSelector": ".product-name a, .name a, h2 a",
+          "priceSelector": ".price-actual, .price",
+          "stockOosRegex": "stoc\\s+epuizat|indisponibil"
+        }
+      }
+    },
+    {
+      "id": "sizeer",
+      "name": "Sizeer.ro",
+      "aliases": ["sizeer.ro", "sizeer"],
+      "domains": ["sizeer.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "fashion",
+      "categories": ["shoes", "clothes"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 12.0, "freeThreshold": 250, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 15.0, "freeThreshold": 250, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Magazin Sizeer" }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 2, "max": 4, "label": "2-4 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 30, "freeReturn": true, "freeReturnMinOrderRon": null, "notes": "30 zile retur gratuit în magazin sau curier" },
+      "ingestion": {
+        "tier": 2,
+        "adapterType": "cheerio_catalog",
+        "liveVerifyCapable": true,
+        "antiBotLevel": "low",
+        "searchUrlTemplate": "https://sizeer.ro/cautare?query={query}",
+        "scraperConfig": {
+          "baseUrl": "https://sizeer.ro",
+          "cardSelector": ".b-itemList_item, .product-tile",
+          "titleSelector": ".b-itemList_nameLink, .product-name a",
+          "linkSelector": ".b-itemList_nameLink, .product-name a",
+          "priceSelector": ".b-itemList_price, .price",
+          "stockOosRegex": "indisponibil|epuizat"
+        }
+      }
+    },
+    {
+      "id": "footshop",
+      "name": "Footshop.ro",
+      "aliases": ["footshop.ro", "footshop"],
+      "domains": ["footshop.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "fashion",
+      "categories": ["shoes", "clothes"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 19.0, "freeThreshold": 499, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "Packeta / easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 25.0, "freeThreshold": 499, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Magazin Footshop București" }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 2, "max": 5, "label": "2-5 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 10.0, "nonRefundableOnReturn": false, "maxOrderRon": 3000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 30, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "30 zile retur" },
+      "ingestion": {
+        "tier": 3,
+        "adapterType": "serper_only",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "cloudflare",
+        "searchUrlTemplate": "https://www.footshop.ro/ro/search?q={query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "gymbeam",
+      "name": "GymBeam.ro",
+      "aliases": ["gymbeam.ro", "gymbeam"],
+      "domains": ["gymbeam.ro"],
+      "platform": "magento2",
+      "businessModel": "1p",
+      "vertical": "supplements_sport",
+      "categories": ["supplements", "clothes"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 11.9, "freeThreshold": 199, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox / Packeta" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 14.9, "freeThreshold": 199, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": false, "fee": null, "freeThreshold": null }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 1, "max": 2, "label": "1-2 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 5.0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 14, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "14 zile retur produse sigilate" },
+      "ingestion": {
+        "tier": 2,
+        "adapterType": "magento2_graphql",
+        "liveVerifyCapable": true,
+        "antiBotLevel": "low",
+        "searchUrlTemplate": "https://gymbeam.ro/catalogsearch/result/?q={query}",
+        "scraperConfig": {
+          "graphqlUrl": "https://gymbeam.ro/graphql",
+          "baseUrl": "https://gymbeam.ro",
+          "urlSuffix": ".html"
+        }
+      }
+    },
+    {
+      "id": "decathlon",
+      "name": "Decathlon",
+      "aliases": ["decathlon.ro", "decathlon"],
+      "domains": ["decathlon.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "supplements_sport",
+      "categories": ["shoes", "clothes", "supplements"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.99, "freeThreshold": 250, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 19.99, "freeThreshold": 250, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Ridicare gratuită din magazin Decathlon" }
+        },
+        "bulkyPolicy": "surcharge_or_excluded",
+        "deliveryDays": { "min": 1, "max": 3, "label": "1-3 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 365, "freeReturn": true, "freeReturnMinOrderRon": null, "notes": "30 zile standard / 365 zile cu cont Decathlon; ridicare gratuită în magazin" },
+      "ingestion": {
+        "tier": 3,
+        "adapterType": "serper_only",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "cloudflare",
+        "searchUrlTemplate": "https://www.decathlon.ro/search?Ntt={query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "myprotein",
+      "name": "Myprotein.ro",
+      "aliases": ["myprotein.ro", "myprotein"],
+      "domains": ["myprotein.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "supplements_sport",
+      "categories": ["supplements", "clothes"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": false, "fee": null, "freeThreshold": null },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 29.0, "freeThreshold": 325, "requiresOnlinePay": true, "maxWeightKg": null },
+          "clickAndCollect": { "available": false, "fee": null, "freeThreshold": null }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 4, "max": 7, "label": "4-7 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": false, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": null, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": ["easybox", "courier"] }
+      },
+      "returns": { "days": 14, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "Expediere externă, plată exclusiv online cu cardul; transport gratuit >=325 lei" },
+      "ingestion": {
+        "tier": 3,
+        "adapterType": "serper_only",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "cloudflare",
+        "searchUrlTemplate": "https://www.myprotein.ro/elysium.search?search={query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "protein4life",
+      "name": "Protein4Life",
+      "aliases": ["protein4life.ro", "protein4life"],
+      "domains": ["protein4life.ro"],
+      "platform": "gomag",
+      "businessModel": "1p",
+      "vertical": "supplements_sport",
+      "categories": ["supplements"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.99, "freeThreshold": 249, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 19.99, "freeThreshold": 249, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": false, "fee": null, "freeThreshold": null }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 1, "max": 2, "label": "1-2 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 14, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "14 zile retur produse sigilate" },
+      "ingestion": {
+        "tier": 2,
+        "adapterType": "cheerio_catalog",
+        "liveVerifyCapable": true,
+        "antiBotLevel": "none",
+        "searchUrlTemplate": "https://www.protein4life.ro/cautare?s={query}",
+        "scraperConfig": {
+          "baseUrl": "https://www.protein4life.ro",
+          "cardSelector": ".product-box, .product-item, .product-card",
+          "titleSelector": ".product-title a, .title a, h2 a",
+          "linkSelector": ".product-title a, .title a, h2 a",
+          "priceSelector": ".price-new, .price, .special-price",
+          "stockOosRegex": "stoc\\s+epuizat|indisponibil"
+        }
+      }
+    },
+    {
+      "id": "intersport",
+      "name": "Intersport",
+      "aliases": ["intersport.ro", "intersport"],
+      "domains": ["intersport.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "supplements_sport",
+      "categories": ["shoes", "clothes"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.0, "freeThreshold": 300, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 18.0, "freeThreshold": 300, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Magazin Intersport" }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 2, "max": 4, "label": "2-4 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 30, "freeReturn": true, "freeReturnMinOrderRon": null, "notes": "30 zile retur în magazin" },
+      "ingestion": {
+        "tier": 2,
+        "adapterType": "cheerio_catalog",
+        "liveVerifyCapable": true,
+        "antiBotLevel": "low",
+        "searchUrlTemplate": "https://www.intersport.ro/cauta/?q={query}",
+        "scraperConfig": {
+          "baseUrl": "https://www.intersport.ro",
+          "cardSelector": ".product-item, .product-tile, .product-box",
+          "titleSelector": ".product-name a, .title a, h2 a",
+          "linkSelector": ".product-name a, .title a, h2 a",
+          "priceSelector": ".price-final, .price",
+          "stockOosRegex": "stoc\\s+epuizat|indisponibil"
+        }
+      }
+    },
+    {
+      "id": "hervis",
+      "name": "Hervis",
+      "aliases": ["hervis.ro", "hervis sports"],
+      "domains": ["hervis.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "supplements_sport",
+      "categories": ["shoes", "clothes"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.9, "freeThreshold": 250, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 19.9, "freeThreshold": 250, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Magazin Hervis" }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 2, "max": 4, "label": "2-4 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 30, "freeReturn": true, "freeReturnMinOrderRon": null, "notes": "30 zile retur în magazinele Hervis" },
+      "ingestion": {
+        "tier": 2,
+        "adapterType": "cheerio_catalog",
+        "liveVerifyCapable": true,
+        "antiBotLevel": "low",
+        "searchUrlTemplate": "https://www.hervis.ro/shop/search/?text={query}",
+        "scraperConfig": {
+          "baseUrl": "https://www.hervis.ro",
+          "cardSelector": ".product-item, .product__list--item",
+          "titleSelector": ".product__list--name, .product-name a, a.name",
+          "linkSelector": ".product__list--name, .product-name a, a.name",
+          "priceSelector": ".product__list--price, .price",
+          "stockOosRegex": "indisponibil|epuizat"
+        }
+      }
+    },
+    {
+      "id": "drmax",
+      "name": "Dr.Max",
+      "aliases": ["drmax.ro", "dr.max", "dr max"],
+      "domains": ["drmax.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "pharmacy_beauty",
+      "categories": ["pharmacy_beauty", "supplements"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 11.99, "freeThreshold": 300, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox / FANbox" },
+          "fanbox": { "available": true, "fee": 11.99, "freeThreshold": 300, "requiresOnlinePay": false, "maxWeightKg": 20 },
+          "courier": { "available": true, "fee": 14.99, "freeThreshold": 300, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Ridicare gratuită din farmacie" }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 1, "max": 3, "label": "1-3 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 14, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "Ridicare gratuită în farmaciile Dr.Max; transport gratuit >=300 lei" },
+      "ingestion": {
+        "tier": 2,
+        "adapterType": "cheerio_catalog",
+        "liveVerifyCapable": true,
+        "antiBotLevel": "low",
+        "searchUrlTemplate": "https://www.drmax.ro/cautare?q={query}",
+        "scraperConfig": {
+          "baseUrl": "https://www.drmax.ro",
+          "cardSelector": ".product-tile, .product-card, .product-item",
+          "titleSelector": ".product-tile__title, .product-title a, h3 a",
+          "linkSelector": "a.product-tile__link, .product-title a, h3 a",
+          "priceSelector": ".price-value, .product-price, .price",
+          "stockOosRegex": "stoc\\s+epuizat|indisponibil"
+        }
+      }
+    },
+    {
+      "id": "farmaciatei",
+      "name": "Farmacia Tei",
+      "aliases": ["farmaciatei.ro", "comenzi.farmaciatei.ro", "farmacia tei"],
+      "domains": ["comenzi.farmaciatei.ro", "farmaciatei.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "pharmacy_beauty",
+      "categories": ["pharmacy_beauty", "supplements"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.9, "freeThreshold": 350, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 19.9, "freeThreshold": 350, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Ridicare din farmacie" }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 2, "max": 4, "label": "2-4 zile" },
+        "membershipProgram": {
+          "programId": "farmacia_tei_elite",
+          "lockerFreeThreshold": 150,
+          "courierFreeThreshold": null,
+          "requiresTier": null,
+          "appliesTo3P": "never"
+        }
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 5.0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 14, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "Tei ELITE oferă livrare gratuită la locker >=150 lei" },
+      "ingestion": {
+        "tier": 3,
+        "adapterType": "serper_only",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "cloudflare",
+        "searchUrlTemplate": "https://comenzi.farmaciatei.ro/cautare?q={query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "bebetei",
+      "name": "Bebe Tei",
+      "aliases": ["bebetei.ro", "comenzi.bebetei.ro", "bebe tei"],
+      "domains": ["comenzi.bebetei.ro", "bebetei.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "pharmacy_beauty",
+      "categories": ["pharmacy_beauty", "supplements"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.9, "freeThreshold": 350, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 19.9, "freeThreshold": 350, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Ridicare din magazin Bebe Tei" }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 2, "max": 4, "label": "2-4 zile" },
+        "membershipProgram": {
+          "programId": "farmacia_tei_elite",
+          "lockerFreeThreshold": 150,
+          "courierFreeThreshold": null,
+          "requiresTier": null,
+          "appliesTo3P": "never"
+        }
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 5.0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 14, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "Tei ELITE oferă livrare gratuită la locker >=150 lei" },
+      "ingestion": {
+        "tier": 3,
+        "adapterType": "serper_only",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "cloudflare",
+        "searchUrlTemplate": "https://comenzi.bebetei.ro/cautare?q={query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "springfarma",
+      "name": "Springfarma",
+      "aliases": ["springfarma.com", "spring farma"],
+      "domains": ["springfarma.com"],
+      "platform": "magento2",
+      "businessModel": "1p",
+      "vertical": "pharmacy_beauty",
+      "categories": ["pharmacy_beauty", "supplements"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 11.9, "freeThreshold": 149, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 16.9, "freeThreshold": 295, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Ridicare din farmacie" }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 1, "max": 3, "label": "1-3 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 14, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "Transport gratuit easybox >=149 lei, curier >=295 lei" },
+      "ingestion": {
+        "tier": 2,
+        "adapterType": "cheerio_catalog",
+        "liveVerifyCapable": true,
+        "antiBotLevel": "none",
+        "searchUrlTemplate": "https://www.springfarma.com/catalogsearch/result/?q={query}",
+        "scraperConfig": {
+          "baseUrl": "https://www.springfarma.com",
+          "cardSelector": ".product-item",
+          "titleSelector": ".product-item-link",
+          "linkSelector": ".product-item-link",
+          "priceSelector": ".price-final_price .price, [data-price-type='finalPrice'] .price",
+          "stockOosRegex": "stoc\\s+epuizat|out\\s+of\\s+stock"
+        }
+      }
+    },
+    {
+      "id": "notino",
+      "name": "Notino.ro",
+      "aliases": ["notino.ro", "notino"],
+      "domains": ["notino.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "pharmacy_beauty",
+      "categories": ["pharmacy_beauty"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.0, "freeThreshold": null, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox / FANbox" },
+          "fanbox": { "available": true, "fee": 14.0, "freeThreshold": null, "requiresOnlinePay": false, "maxWeightKg": 20 },
+          "courier": { "available": true, "fee": 18.0, "freeThreshold": null, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Magazin Notino" }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 2, "max": 3, "label": "2-3 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 5.0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 90, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "90 zile retur; fără prag universal permanent de livrare gratuită" },
+      "ingestion": {
+        "tier": 3,
+        "adapterType": "serper_only",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "cloudflare",
+        "searchUrlTemplate": "https://www.notino.ro/search.asp?exps={query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "sephora",
+      "name": "Sephora.ro",
+      "aliases": ["sephora.ro", "sephora"],
+      "domains": ["sephora.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "pharmacy_beauty",
+      "categories": ["pharmacy_beauty"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 14.0, "freeThreshold": 180, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 19.0, "freeThreshold": 180, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Click & Collect Sephora" }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 1, "max": 3, "label": "1-3 zile" },
+        "membershipProgram": {
+          "programId": "sephora_gold",
+          "lockerFreeThreshold": 0,
+          "courierFreeThreshold": 0,
+          "requiresTier": null,
+          "appliesTo3P": "never"
+        }
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 30, "freeReturn": true, "freeReturnMinOrderRon": null, "notes": "Transport gratuit >=180 lei, Click & Collect gratuit, sau fără prag cu Sephora Gold" },
+      "ingestion": {
+        "tier": 3,
+        "adapterType": "serper_only",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "akamai",
+        "searchUrlTemplate": "https://www.sephora.ro/cautare/?q={query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "dedeman",
+      "name": "Dedeman",
+      "aliases": ["dedeman.ro", "dedeman"],
+      "domains": ["dedeman.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "diy_home",
+      "categories": ["diy_home"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": false, "fee": null, "freeThreshold": null },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 19.9, "freeThreshold": null, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Ridicare din magazin Dedeman" }
+        },
+        "bulkyPolicy": "dynamic_checkout_only",
+        "deliveryDays": { "min": 2, "max": 5, "label": "2-5 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 5.0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 30, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "Transport calculat dinamic la checkout după greutate/volum/distanță" },
+      "ingestion": {
+        "tier": 4,
+        "adapterType": "manual_link",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "cloudflare",
+        "searchUrlTemplate": "https://www.dedeman.ro/ro/catalogsearch/result/?q={query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "hornbach",
+      "name": "Hornbach",
+      "aliases": ["hornbach.ro", "hornbach"],
+      "domains": ["hornbach.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "diy_home",
+      "categories": ["diy_home"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": false, "fee": null, "freeThreshold": null },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 24.9, "freeThreshold": null, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Rezervă și ridică în magazin" }
+        },
+        "bulkyPolicy": "dynamic_checkout_only",
+        "deliveryDays": { "min": 2, "max": 5, "label": "2-5 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 30, "freeReturn": true, "freeReturnMinOrderRon": null, "notes": "Transport calculat la checkout în funcție de volum/greutate; ridicare gratuită" },
+      "ingestion": {
+        "tier": 4,
+        "adapterType": "manual_link",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "cloudflare",
+        "searchUrlTemplate": "https://www.hornbach.ro/s/{query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "ikea",
+      "name": "IKEA",
+      "aliases": ["ikea.com", "ikea.ro", "ikea"],
+      "domains": ["ikea.com"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "diy_home",
+      "categories": ["diy_home"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": false, "fee": null, "freeThreshold": null },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 39.0, "freeThreshold": null, "requiresOnlinePay": true, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 19.0, "freeThreshold": null, "label": "Punct ridicare IKEA" }
+        },
+        "bulkyPolicy": "dynamic_checkout_only",
+        "deliveryDays": { "min": 2, "max": 7, "label": "2-7 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": false, "fee": 0, "nonRefundableOnReturn": false, "maxOrderRon": null, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": ["courier", "clickAndCollect"] }
+      },
+      "returns": { "days": 365, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "Transport calculat dinamic la checkout după greutate/zonă; 365 zile retur în magazin" },
+      "ingestion": {
+        "tier": 4,
+        "adapterType": "manual_link",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "akamai",
+        "searchUrlTemplate": "https://www.ikea.com/ro/ro/search/?q={query}",
+        "scraperConfig": null
+      }
+    },
+    {
+      "id": "carturesti",
+      "name": "Cărturești",
+      "aliases": ["carturesti.ro", "carturesti"],
+      "domains": ["carturesti.ro"],
+      "platform": "custom",
+      "businessModel": "1p",
+      "vertical": "books",
+      "categories": ["books"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 12.9, "freeThreshold": 150, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 16.9, "freeThreshold": 150, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Librărie Cărturești" }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 1, "max": 3, "label": "1-3 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 5.0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 14, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "Transport gratuit >=150 lei sau ridicare gratuită din librării" },
+      "ingestion": {
+        "tier": 2,
+        "adapterType": "cheerio_catalog",
+        "liveVerifyCapable": true,
+        "antiBotLevel": "low",
+        "searchUrlTemplate": "https://carturesti.ro/product/search/{query}",
+        "scraperConfig": {
+          "baseUrl": "https://carturesti.ro",
+          "cardSelector": ".cartu-grid-tile, .product-card, .product",
+          "titleSelector": ".md-title, .product-title, h5 a, a.cartu-title",
+          "linkSelector": "a.cartu-title, .product-title a, a[href*='/carte/'], a[href*='/produs/']",
+          "priceSelector": ".suma, .price-new, .price",
+          "stockOosRegex": "indisponibil|epuizat|stoc\\s+0"
+        }
+      }
+    },
+    {
+      "id": "elefant",
+      "name": "elefant.ro",
+      "aliases": ["elefant.ro", "elefant"],
+      "domains": ["elefant.ro"],
+      "platform": "custom",
+      "businessModel": "marketplace_hybrid",
+      "vertical": "books",
+      "categories": ["books", "pharmacy_beauty", "supplements"],
+      "shipping": {
+        "channels": {
+          "easybox": { "available": true, "fee": 9.99, "freeThreshold": 199, "requiresOnlinePay": false, "maxWeightKg": 20, "label": "easybox / pick-up" },
+          "fanbox": { "available": false, "fee": null, "freeThreshold": null },
+          "courier": { "available": true, "fee": 16.99, "freeThreshold": 199, "requiresOnlinePay": false, "maxWeightKg": null },
+          "clickAndCollect": { "available": true, "fee": 0, "freeThreshold": 0, "label": "Pick-up point elefant" }
+        },
+        "bulkyPolicy": "standard",
+        "deliveryDays": { "min": 2, "max": 4, "label": "2-4 zile" },
+        "membershipProgram": null
+      },
+      "payment": {
+        "cardOnline": true,
+        "ramburs": { "allowed": true, "fee": 5.0, "nonRefundableOnReturn": false, "maxOrderRon": 5000, "maxWeightKg": null, "disablesFreeShipping": false, "disabledOnChannels": [] }
+      },
+      "returns": { "days": 30, "freeReturn": false, "freeReturnMinOrderRon": null, "notes": "Verifică vânzătorul și termenele de livrare" },
+      "ingestion": {
+        "tier": 3,
+        "adapterType": "serper_only",
+        "liveVerifyCapable": false,
+        "antiBotLevel": "cloudflare",
+        "searchUrlTemplate": "https://www.elefant.ro/search?SearchTerm={query}",
+        "scraperConfig": null
+      }
+    }
+  ]
+}

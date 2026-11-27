@@ -931,3 +931,286 @@ tbody tr.is-oos {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* Link Confirmation Form (Tab 2) */
+.link-confirm-form {
+  margin-block-start: 1rem;
+  padding-block-start: 0.85rem;
+  border-block-start: 1px solid var(--border);
+}
+
+/* Voucher Store Scope + Memberships Popover */
+.voucher-group {
+  min-inline-size: 210px;
+}
+
+.voucher-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.voucher-inputs input[type="number"] {
+  inline-size: 74px;
+}
+
+.voucher-inputs select {
+  max-inline-size: 165px;
+}
+
+.option-label-static {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.membership-dropdown {
+  position: relative;
+  min-inline-size: 165px;
+}
+
+.membership-trigger {
+  min-block-size: 2.35rem;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.9rem;
+  background: var(--bg);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.membership-popover {
+  position: absolute;
+  inset-block-start: calc(100% + 0.4rem);
+  inset-inline-end: 0;
+  z-index: 30;
+  inline-size: min(320px, 90vw);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.14);
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.membership-popover[hidden] {
+  display: none;
+}
+
+.membership-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.membership-section + .membership-section {
+  padding-block-start: 0.65rem;
+  border-block-start: 1px solid var(--border);
+}
+
+.membership-section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.membership-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.87rem;
+  cursor: pointer;
+}
+
+.membership-option input {
+  margin-block-start: 0.2rem;
+}
+
+.membership-option small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.77rem;
+}
+
+/* Source Comparison Banner */
+.source-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem 1rem;
+  padding: 0.85rem 1.15rem;
+  border-radius: 0.85rem;
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: 0.94rem;
+  font-weight: 600;
+}
+
+.source-banner.is-best-source {
+  border-color: var(--border);
+  background: var(--surface-alt);
+}
+
+/* Cache & Toolbar Controls */
+.results-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+.cache-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.cache-freshness {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* Truthful Badges & Warnings */
+.winner-eyebrow.is-unverified {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.winner-eyebrow.is-oos {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-block-start: 0.25rem;
+}
+
+.meta-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.12rem 0.48rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.badge-3p {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.badge-history-min {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.badge-history-drop {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.badge-unit {
+  background: var(--surface-alt);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.shipping-unknown {
+  color: var(--warn);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Collapsible Alte Variante */
+.variants-details {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.variants-summary {
+  padding: 0.9rem 1.25rem;
+  font-weight: 700;
+  font-size: 0.98rem;
+  cursor: pointer;
+  background: var(--surface-alt);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.variants-summary::after {
+  content: "▾";
+  color: var(--muted);
+}
+
+.variants-details[open] .variants-summary::after {
+  content: "▴";
+}
+
+.variants-table-wrap {
+  overflow-x: auto;
+}
+
+/* Store Health Status Strip */
+.health-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  font-size: 0.8rem;
+}
+
+.health-strip-label {
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.health-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+}
+
+.health-closed {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: transparent;
+}
+
+.health-half {
+  background: var(--warn-soft);
+  color: var(--warn);
+  border-color: transparent;
+}
+
+.health-open {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: transparent;
+}
+
+.remember-keys-label {
+  font-size: 0.86rem;
+}
