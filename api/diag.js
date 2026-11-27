@@ -1,28 +1,24 @@
-// Temporary diagnostic: full traineddata download timing on Vercel.
-const https = require('node:https');
-
-const URLS = {
-  best_int: 'https://cdn.jsdelivr.net/npm/@tesseract.js-data/eng/4.0.0_best_int/eng.traineddata.gz',
-  standard: 'https://cdn.jsdelivr.net/npm/@tesseract.js-data/eng/4.0.0/eng.traineddata.gz',
-};
-
-function download(url, timeoutMs = 25000) {
-  return new Promise((resolve) => {
-    const t0 = Date.now();
-    let bytes = 0;
-    const req = https.get(url, { timeout: timeoutMs }, (res) => {
-      res.on('data', (c) => { bytes += c.length; });
-      res.on('end', () => resolve({ status: res.statusCode, bytes, ms: Date.now() - t0 }));
-      res.on('aborted', () => resolve({ error: 'aborted', bytes, ms: Date.now() - t0 }));
-    });
-    req.on('timeout', () => { req.destroy(); resolve({ error: 'timeout', bytes, ms: Date.now() - t0 }); });
-    req.on('error', (e) => resolve({ error: e.message, bytes, ms: Date.now() - t0 }));
-  });
+// Temporary diagnostic: trace Tesseract createWorker progress on Vercel.
+function withTimeout(p, ms) {
+  return Promise.race([p, new Promise((r) => setTimeout(() => r({ error: 'outer timeout' }), ms))]);
 }
 
 module.exports = async (req, res) => {
-  const out = {};
-  for (const [k, u] of Object.entries(URLS)) out[k] = await download(u);
+  const events = [];
+  const out = { events };
+  try {
+    const { createWorker } = require('tesseract.js');
+    const t0 = Date.now();
+    const logger = (m) => events.push(`${Date.now() - t0}ms ${m.status} ${m.progress != null ? m.progress : ''}`.trim());
+    const maybeWorker = await withTimeout(createWorker('eng', 1, {
+      cachePath: '/tmp/frugalradar-tessdata',
+      logger,
+    }), 30000);
+    out.result = maybeWorker && maybeWorker.error ? maybeWorker.error : { ok: true, ms: Date.now() - t0 };
+    if (maybeWorker && !maybeWorker.error) await maybeWorker.terminate().catch(() => {});
+  } catch (e) {
+    out.result = { error: String(e && e.message || e) };
+  }
   res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify(out, null, 2));
 };
