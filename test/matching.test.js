@@ -154,6 +154,17 @@ test('scoreCandidate keeps specific sneaker families distinct and treats Air Max
   assert.equal(wrongColor.rejectReason, 'color_mismatch');
 
   for (const title of [
+    'Nike Air Max Plus TN Black/ Off Noir-Metallic Silver',
+    "Nike Air Max Plus 'Bred' Bărbați DO6383-001 Black",
+    'Nike Air Max Plus Piele Întoarsă Neagră Argintiu Femei',
+    'Nike Tn Air Max Plus Sneaker Blau Schwarz Gr.40',
+  ]) {
+    const mixedColor = scoreCandidate(title, query, { category: 'shoes' });
+    assert.equal(mixedColor.rejected, true, `should reject mixed colorway ${title}`);
+    assert.equal(mixedColor.rejectReason, 'color_mismatch');
+  }
+
+  for (const title of [
     'Nike Air Max 97 Triple Black',
     'Nike Air Max 270 Triple Black',
     'Pantofi sport Nike Air Max 95 x Corteiz Honey Black',
