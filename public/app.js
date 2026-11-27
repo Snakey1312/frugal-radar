@@ -1000,7 +1000,8 @@
       sName.textContent = offer.storeName;
       const sProd = document.createElement('span');
       sProd.className = 'store-domain';
-      sProd.textContent = offer.productTitle || offer.title || offer.domain;
+      sProd.textContent = [offer.productTitle || offer.title || offer.domain, offer.priceNote]
+        .filter(Boolean).join(' • ');
       storeDiv.append(sName, sProd);
       const badges = buildOfferBadges(offer);
       if (badges.length > 0) {
@@ -1130,7 +1131,7 @@
 
       const title = document.createElement('h3');
       title.className = 'winner-title';
-      title.textContent = `${bestOffer.storeName} — ${bestOffer.productTitle || bestOffer.title || data.query}`;
+      title.textContent = `${bestOffer.storeName} — ${bestOffer.productTitle || bestOffer.title || data.query}${bestOffer.priceNote ? ` • ${bestOffer.priceNote}` : ''}`;
 
       const breakdown = document.createElement('p');
       breakdown.className = 'winner-breakdown';

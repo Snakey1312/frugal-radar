@@ -1,0 +1,31 @@
+{
+  "capturedAt": "2026-11-27T15:09:50.323Z",
+  "note": "Ultimul preț eMAG obținut direct de pe site. eMAG blochează IP-urile Vercel, deci prețul este o captură datată, nu un preț live.",
+  "offers": [
+    {
+      "title": "Rezerva PHILIPS OneBlade 360, QP420/50, otel inoxidabil, umed si uscat, kit 2 lame, pentru orice model PHILIPS OneBlade si OneBladePro, Verde",
+      "url": "https://emag.ro/rezerva-philips-oneblade-360-otel-inoxidabil-umed-si-uscat-kit-2-lame-pentru-orice-model-philips-oneblade-si-onebladepro-verde-qp420-50/pd/DXMCQZMBM",
+      "price": 104.83
+    },
+    {
+      "title": "Rezerva PHILIPS OneBlade 360, QP430/50, otel inoxidabil, umed si uscat, kit 3 lame, pentru orice model PHILIPS OneBlade si OneBladePro, Verde",
+      "url": "https://emag.ro/rezerva-philips-oneblade-360-otel-inoxidabil-umed-si-uscat-kit-3-lame-pentru-orice-model-philips-oneblade-si-onebladepro-verde-qp430-50/pd/DJK313YBM",
+      "price": 159.9
+    },
+    {
+      "title": "Rezerva PHILIPS OneBlade 360, QP440/50, otel inoxidabil, umed si uscat, kit 4 lame, pentru orice model PHILIPS OneBlade si OneBladePro, Verde",
+      "url": "https://emag.ro/rezerva-philips-oneblade-360-otel-inoxidabil-umed-si-uscat-kit-4-lame-pentru-orice-model-philips-oneblade-si-onebladepro-verde-qp440-50/pd/DFK313YBM",
+      "price": 171.24
+    },
+    {
+      "title": "Rezerve PHILIPS OneBlade QP936/50, pachet de 3 lame: 1x lama 360, 1x lama Anti-Friction, 1x lama Intimate, compatibile cu orice aparat OneBlade",
+      "url": "https://emag.ro/rezerve-philips-oneblade-pachet-de-3-lame-1x-lama-360-1x-lama-anti-friction-1x-lama-intimate-compatibile-cu-orice-aparat-oneblade-qp936-50/pd/DGZZXB2BM",
+      "price": 199.99
+    },
+    {
+      "title": "Rezerva PHILIPS OneBlade 360, QP450/50, otel inoxidabil, umed si uscat, kit 5 lame, pentru orice model PHILIPS OneBlade si OneBladePro, Verde",
+      "url": "https://emag.ro/rezerva-philips-oneblade-360-otel-inoxidabil-umed-si-uscat-kit-5-lame-pentru-orice-model-philips-oneblade-si-onebladepro-verde-qp450-50/pd/DT22QD2BM",
+      "price": 233.88
+    }
+  ]
+}
